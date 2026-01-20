@@ -360,7 +360,7 @@ const Contact = () => {
                                 <div className="bg-gray-200 h-96 rounded-xl overflow-hidden">
                                     <iframe
                                         title="Office Location"
-                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d106.8195613506864!3d-6.194741395493371!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f5390917b759%3A0x6b45e67356080477!2sPT%20Pertamina%20(Persero)!5e0!3m2!1sen!2sid!4v1628584429577!5m2!1sen!2sid"
+                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3951.2135997797236!2d112.659016!3d-7.976862!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd6285c5c1b44e3%3A0xf6c889ac7452dc3a!2sSMK%20Telkom%20Malang!5e0!3m2!1sid!2sid!4v1768921389829!5m2!1sid!2sid" 
                                         width="100%"
                                         height="100%"
                                         style={{ border: 0 }}
@@ -375,24 +375,22 @@ const Contact = () => {
                                     <li className="flex items-start">
                                         <MapPin className="h-5 w-5 mr-3 mt-1" />
                                         <span>
-                                            Gedung Pertamina<br />
-                                            Jl. Medan Merdeka Timur 1A<br />
-                                            Jakarta 10110, Indonesia
+                                            Jl. Danau Ranau, Sawojajar, Kec. Kedungkandang, Kota Malang, Jawa Timur 65139
                                         </span>
                                     </li>
                                     <li className="flex items-center">
                                         <Clock className="h-5 w-5 mr-3" />
-                                        <span>Senin - Jumat: 09:00 - 17:00 WIB</span>
+                                        <span>Senin - Jumat: 06:00 - 16:00 WIB</span>
                                     </li>
                                     <li className="flex items-center">
                                         <Phone className="h-5 w-5 mr-3" />
-                                        <span>+62 21 1234 5678</span>
+                                        <span>081223488999</span>
                                     </li>
                                 </ul>
                                 <Button
                                     variant="secondary"
                                     className="mt-6 w-full"
-                                    onClick={() => window.open('https://maps.google.com', '_blank')}
+                                    onClick={() => window.open('https://maps.app.goo.gl/BXHyXybr1DqjrGMz5', '_blank')}
                                 >
                                     Dapatkan Petunjuk Arah
                                 </Button>

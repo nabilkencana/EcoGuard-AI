@@ -110,9 +110,9 @@ export const steps = [
 
 export const testimonials = [
     {
-        name: 'Budi Santoso',
-        role: 'Facility Manager',
-        company: 'PT Pertamina RU V',
+        name: 'Mohammad Ali',
+        role: 'Swasta',
+        company: 'Petani Tangguh',
         content: 'EcoGuard AI membantu kami menghemat 28% konsumsi listrik.',
         rating: 5,
     },

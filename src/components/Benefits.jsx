@@ -1,7 +1,53 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingDown, Users, Globe, DollarSign, Shield, Target } from 'lucide-react';
 
 const Benefits = () => {
+    const [electricityUsage, setElectricityUsage] = useState(0);
+    const [waterUsage, setWaterUsage] = useState(0);
+    const [facilitySize, setFacilitySize] = useState(0);
+    const [savingsResult, setSavingsResult] = useState(null);
+
+    const calculateSavings = () => {
+        // Tarif dasar (disesuaikan dengan kondisi Indonesia)
+        const electricityRate = 1500; // Rp per kWh
+        const waterRate = 8000; // Rp per m³
+
+        // Faktor penghematan EcoGuard AI (berdasarkan case studies)
+        const electricitySavingsRate = 0.22; // 22% penghematan listrik
+        const waterSavingsRate = 0.27; // 27% penghematan air
+
+        // Hitung biaya saat ini
+        const currentElectricityCost = electricityUsage * electricityRate;
+        const currentWaterCost = waterUsage * waterRate;
+        const currentTotalMonthlyCost = currentElectricityCost + currentWaterCost;
+
+        // Hitung penghematan
+        const electricitySavings = currentElectricityCost * electricitySavingsRate;
+        const waterSavings = currentWaterCost * waterSavingsRate;
+        const totalMonthlySavings = electricitySavings + waterSavings;
+
+        // Estimasi biaya implementasi EcoGuard AI
+        const baseInstallationCost = 50000000; // Rp 50 juta dasar
+        const costPerSquareMeter = 5000; // Rp per m²
+        const estimatedInstallationCost = baseInstallationCost + (facilitySize * costPerSquareMeter);
+
+        // ROI Calculation
+        const firstYearSavings = totalMonthlySavings * 12;
+        const roiMonths = Math.ceil(estimatedInstallationCost / totalMonthlySavings);
+
+        setSavingsResult({
+            electricitySavings,
+            waterSavings,
+            totalMonthlySavings,
+            currentTotalMonthlyCost,
+            firstYearSavings,
+            roiMonths,
+            estimatedInstallationCost,
+            annualSavingsPercentage: (totalMonthlySavings * 12 / currentTotalMonthlyCost * 100).toFixed(1)
+        });
+    };
+
     const benefits = [
         {
             icon: TrendingDown,
@@ -98,60 +144,137 @@ const Benefits = () => {
                     ))}
                 </div>
 
-                {/* ROI Calculator */}
+                {/* ROI Calculator dengan Fungsi Real */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8 }}
                     viewport={{ once: true }}
-                    className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-12 text-white"
+                    className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-8 lg:p-12 text-white"
                 >
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                    <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                         <div>
-                            <h3 className="text-3xl font-bold mb-4">
+                            <h3 className="text-2xl lg:text-3xl font-bold mb-4">
                                 Hitung Potensi Penghematan Anda
                             </h3>
-                            <p className="text-blue-100 text-lg mb-6">
+                            <p className="text-blue-100 text-base lg:text-lg mb-6">
                                 Masukkan data konsumsi Anda untuk melihat estimasi penghematan dengan EcoGuard AI.
                             </p>
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-3 gap-3 lg:gap-4">
                                 {[
-                                    { value: '15-30%', label: 'Listrik' },
-                                    { value: '25-40%', label: 'Air' },
-                                    { value: '185jt/bln', label: 'Rata-rata' },
+                                    { value: '15-30%', label: 'Penghematan Listrik' },
+                                    { value: '20-35%', label: 'Penghematan Air' },
+                                    { value: '12-24 bulan', label: 'ROI Period' },
                                 ].map((item, i) => (
-                                    <div key={i} className="bg-white/20 p-4 rounded-xl text-center backdrop-blur-sm">
-                                        <div className="text-xl font-bold">{item.value}</div>
-                                        <div className="text-sm text-blue-200">{item.label}</div>
+                                    <div key={i} className="bg-white/20 p-3 lg:p-4 rounded-xl text-center backdrop-blur-sm">
+                                        <div className="text-lg lg:text-xl font-bold">{item.value}</div>
+                                        <div className="text-xs lg:text-sm text-blue-200">{item.label}</div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         {/* Calculator Form */}
-                        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-                            <div className="space-y-6">
+                        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/20">
+                            <div className="space-y-4 lg:space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-blue-200 mb-2">
                                         Konsumsi Listrik Bulanan (kWh)
                                     </label>
                                     <input
                                         type="number"
+                                        id="electricityUsage"
                                         placeholder="Contoh: 50000"
+                                        min="0"
                                         className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                                        onChange={(e) => setElectricityUsage(parseFloat(e.target.value) || 0)}
                                     />
+                                    <div className="mt-1 text-xs text-blue-200">
+                                        Biaya listrik: Rp 1,500/kWh
+                                    </div>
                                 </div>
+
                                 <div>
                                     <label className="block text-sm font-medium text-blue-200 mb-2">
                                         Konsumsi Air Bulanan (m³)
                                     </label>
                                     <input
                                         type="number"
+                                        id="waterUsage"
                                         placeholder="Contoh: 1000"
+                                        min="0"
                                         className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                                        onChange={(e) => setWaterUsage(parseFloat(e.target.value) || 0)}
+                                    />
+                                    <div className="mt-1 text-xs text-blue-200">
+                                        Biaya air: Rp 8,000/m³
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-blue-200 mb-2">
+                                        Ukuran Fasilitas (m²)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="facilitySize"
+                                        placeholder="Contoh: 10000"
+                                        min="0"
+                                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                                        onChange={(e) => setFacilitySize(parseFloat(e.target.value) || 0)}
                                     />
                                 </div>
-                                <button className="w-full py-3 bg-gradient-to-r from-cyan-400 to-cyan-300 text-blue-900 font-bold rounded-lg hover:from-cyan-300 hover:to-cyan-200 transition-all">
+
+                                {/* Results Display */}
+                                {savingsResult && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="bg-white/10 p-4 rounded-lg border border-white/20"
+                                    >
+                                        <h4 className="font-bold text-lg mb-2 text-cyan-300">Hasil Perhitungan:</h4>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between">
+                                                <span>Penghematan Listrik:</span>
+                                                <span className="font-bold">Rp {savingsResult.electricitySavings.toLocaleString('id-ID')}/bln</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Penghematan Air:</span>
+                                                <span className="font-bold">Rp {savingsResult.waterSavings.toLocaleString('id-ID')}/bln</span>
+                                            </div>
+                                            <div className="flex justify-between border-t border-white/20 pt-2">
+                                                <span>Total Penghematan:</span>
+                                                <span className="font-bold text-lg text-cyan-300">Rp {savingsResult.totalMonthlySavings.toLocaleString('id-ID')}/bln</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Tahun 1 (Total):</span>
+                                                <span className="font-bold">Rp {savingsResult.firstYearSavings.toLocaleString('id-ID')}</span>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {savingsResult && (
+                                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="bg-white/10 p-4 rounded-xl">
+                                            <div className="text-sm text-blue-200">ROI Period</div>
+                                            <div className="text-xl font-bold text-cyan-300">{savingsResult.roiMonths} bulan</div>
+                                        </div>
+                                        <div className="bg-white/10 p-4 rounded-xl">
+                                            <div className="text-sm text-blue-200">Penghematan Tahunan</div>
+                                            <div className="text-xl font-bold text-cyan-300">{savingsResult.annualSavingsPercentage}%</div>
+                                        </div>
+                                        <div className="bg-white/10 p-4 rounded-xl">
+                                            <div className="text-sm text-blue-200">Investasi Awal</div>
+                                            <div className="text-xl font-bold text-cyan-300">Rp {savingsResult.estimatedInstallationCost.toLocaleString('id-ID')}</div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={calculateSavings}
+                                    className="w-full py-3 bg-gradient-to-r from-cyan-400 to-cyan-300 text-blue-900 font-bold rounded-lg hover:from-cyan-300 hover:to-cyan-200 transition-all transform hover:scale-[1.02]"
+                                >
                                     Hitung Penghematan
                                 </button>
                             </div>

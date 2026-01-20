@@ -62,22 +62,22 @@ const Benefits = () => {
 
     const testimonials = [
         {
-            name: "Budi Santoso",
-            role: "Direktur Operasional, PT Hijau Lestari",
-            content: "EcoGuard AI membantu kami mengurangi konsumsi energi sebesar 35% dalam 6 bulan pertama.",
-            avatar: "BS"
+            name: 'Mohammad Ali',
+            position: 'Swasta',
+            content: 'EcoGuard AI membantu kami menghemat 28% konsumsi listrik dalam 3 bulan pertama. Sistem AI-nya sangat akurat dalam memprediksi pola penggunaan.',
+            avatar: 'Ma',
         },
         {
-            name: "Sari Dewi",
-            role: "Manajer Sustainability, Mega Corp",
-            content: "Sistem pelaporan otomatis menghemat ratusan jam kerja tim kami setiap tahun.",
-            avatar: "SD"
+            name: 'Nisfu Laila',
+            position: 'Karyawan Swasta',
+            content: 'Sebagai kampus yang berkomitmen pada sustainability, EcoGuard AI menjadi solusi sempurna untuk monitoring dan reporting emisi karbon kami.',
+            avatar: 'NL',
         },
         {
-            name: "Ahmad Rizki",
-            role: "CEO, GreenTech Solutions",
-            content: "Investasi terbaik untuk masa depan bisnis dan planet kita.",
-            avatar: "AR"
+            name: 'Lilik Heru',
+            position: 'Manajemen Oprasi',
+            content: 'Penghematan air mencapai 35% setelah implementasi. Smart alerts membantu tim maintenance merespons kebocoran dengan cepat.',
+            avatar: 'LH',
         }
     ];
 
@@ -120,16 +120,10 @@ const Benefits = () => {
                         
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link
-                                to="/demo"
+                                to="/demo-request"
                                 className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg font-bold text-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl"
                             >
                                 Coba Demo Gratis
-                            </Link>
-                            <Link
-                                to="/harga"
-                                className="px-8 py-4 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg font-bold text-lg transition-all duration-300"
-                            >
-                                Lihat Paket
                             </Link>
                         </div>
                     </div>
@@ -301,13 +295,13 @@ const Benefits = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                    to="/kontak"
+                    to="/contact"
                     className="px-8 py-4 bg-white text-green-900 hover:bg-gray-100 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105"
                 >
                     Hubungi Sales
                 </Link>
                 <Link
-                    to="/demo"
+                    to="/demo-request"
                     className="px-8 py-4 bg-transparent border-2 border-white hover:bg-white/10 rounded-lg font-bold text-lg transition-all duration-300"
                 >
                     Jadwalkan Demo

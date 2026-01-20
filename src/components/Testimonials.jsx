@@ -7,35 +7,35 @@ const Testimonials = () => {
 
     const testimonials = [
         {
-            name: 'Budi Santoso',
-            position: 'Facility Manager',
-            company: 'PT Pertamina RU V',
+            name: 'Mohammad Ali',
+            position: 'Swasta',
+            company: 'Petani Tangguh',
             content: 'EcoGuard AI membantu kami menghemat 28% konsumsi listrik dalam 3 bulan pertama. Sistem AI-nya sangat akurat dalam memprediksi pola penggunaan.',
             rating: 5,
-            avatar: 'BS',
+            avatar: 'Ma',
             color: 'from-green-500 to-emerald-500',
         },
         {
-            name: 'Sari Dewi',
-            position: 'Sustainability Director',
-            company: 'Universitas Indonesia',
+            name: 'Nisfu Laila',
+            position: 'Karyawan Swasta',
+            company: 'PT Distributor Swasta',
             content: 'Sebagai kampus yang berkomitmen pada sustainability, EcoGuard AI menjadi solusi sempurna untuk monitoring dan reporting emisi karbon kami.',
             rating: 5,
-            avatar: 'SD',
+            avatar: 'NL',
             color: 'from-blue-500 to-cyan-500',
         },
         {
-            name: 'Agus Wijaya',
-            position: 'Operations Manager',
+            name: 'Lilik Heru',
+            position: 'Manajemen Oprasi',
             company: 'Mall Taman Anggrek',
             content: 'Penghematan air mencapai 35% setelah implementasi. Smart alerts membantu tim maintenance merespons kebocoran dengan cepat.',
             rating: 4,
-            avatar: 'AW',
+            avatar: 'LH',
             color: 'from-purple-500 to-pink-500',
         },
         {
             name: 'Lisa Hartono',
-            position: 'CEO',
+            position: 'OB',
             company: 'Hotel Santika Group',
             content: 'ROI tercapai dalam 8 bulan. Dashboard yang user-friendly membuat seluruh tim bisa berkontribusi dalam program efisiensi.',
             rating: 5,
@@ -199,13 +199,15 @@ const Testimonials = () => {
                     <p className="text-center text-gray-600 mb-8">
                         Dipercaya oleh perusahaan terkemuka
                     </p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
-                        {['Pertamina', 'UI', 'ITB', 'UGM', 'Santika', 'Siloam'].map((company, i) => (
+
+                    {/* Container dengan flexbox untuk menengahkan */}
+                    <div className="flex flex-wrap justify-center gap-8">
+                        {['SMK Telkom Malang', 'VRagio', 'Indosat'].map((company, i) => (
                             <div
                                 key={i}
-                                className="bg-gray-50 p-6 rounded-xl flex items-center justify-center hover:bg-white hover:shadow-lg transition-all"
+                                className="bg-gray-50 p-6 rounded-xl flex items-center justify-center hover:bg-white hover:shadow-lg transition-all min-w-[180px]"
                             >
-                                <div className="text-lg font-bold text-gray-700">{company}</div>
+                                <div className="text-lg font-bold text-gray-700 text-center">{company}</div>
                             </div>
                         ))}
                     </div>

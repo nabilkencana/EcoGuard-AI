@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     ArrowRight,
@@ -14,8 +15,10 @@ import {
     Clock,
     BarChart3
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Tambahkan ini
 
 const Hero = () => {
+    const navigate = useNavigate(); // Tambahkan ini
     return (
         <section className="relative overflow-hidden">
             {/* Background Gradient */}
@@ -73,13 +76,16 @@ const Hero = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 className="group px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-500 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-600 transition-all shadow-xl hover:shadow-2xl flex items-center justify-center text-lg"
-                            >
+                            >   
+                                <Link to="/demo-request">
                                 Coba Demo Gratis
+                                </Link>
                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </motion.button>
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
+                                onClick={() => navigate('/under-development')} // Tambahkan ini
                                 className="group px-8 py-4 bg-white text-green-600 font-bold rounded-xl border-2 border-green-600 hover:bg-green-50 transition-all flex items-center justify-center text-lg shadow-lg hover:shadow-xl"
                             >
                                 <Play className="h-5 w-5 mr-2 fill-green-600" />

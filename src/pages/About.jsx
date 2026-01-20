@@ -32,11 +32,11 @@ const About = () => {
     ];
 
     const milestones = [
-        { year: '2023', event: 'Riset & Development' },
-        { year: '2024', event: 'Launch Beta Version' },
-        { year: '2024', event: 'Pertamina Partnership' },
-        { year: '2025', event: '100+ Clients' },
-        { year: '2026', event: 'Eco-Innovation Competition' },
+        { year: '13 Januari 2026', event: 'Riset & Development' },
+        { year: '15 Januari 2026', event: 'Launch Beta Version' },
+        { year: '17 Januari 2026', event: 'Implementation' },
+        { year: '20 Januari 2026', event: 'BluePrint IOT' },
+        { year: '24 Januari 2026', event: 'Eco-Innovation Competition' },
     ];
 
     return (
@@ -214,19 +214,29 @@ const About = () => {
                 <div className="grid md:grid-cols-3 gap-8">
                     {[
                         {
-                            name: 'Dr. Andi Wijaya',
-                            role: 'Chief AI Scientist',
-                            description: 'PhD in Artificial Intelligence dengan 15+ tahun pengalaman.',
+                            name: 'M. Nabil Anwar K.',
+                            role: 'Developer dan Project Manager',
+                            description: 'Membuat website and aplikasi , Logika dan implementasi',
                         },
                         {
-                            name: 'Sarah Chen',
-                            role: 'Head of Sustainability',
-                            description: 'Ahli sustainability dengan sertifikasi LEED dan WELL.',
+                            name: 'Risky Nabil Pahlevi',
+                            role: 'QA Website',
+                            description: 'Pengetesan website.',
                         },
                         {
-                            name: 'Rizki Pratama',
-                            role: 'CTO & Co-founder',
-                            description: 'Spesialis IoT dan cloud computing dengan pengalaman enterprise.',
+                            name: 'Styven Dwi Nugroho',
+                            role: 'Pemantapan Ide ',
+                            description: 'Penyempurnaan Ide dan Pengembangan konsep awal .',
+                        },
+                        {
+                            name: 'Nauval Luthf Hisyam',
+                            role: 'Developer IOT',
+                            description: 'Pembeuatan prototype IOT dan Pembuatan blueprint IOT.',
+                        },
+                        {
+                            name: 'Elzidane Ardyansyah',
+                            role: 'QA Application',
+                            description: 'Pengetesan aplikasi EcoGuard.',
                         },
                     ].map((member, index) => (
                         <motion.div
