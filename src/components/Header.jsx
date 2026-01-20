@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Leaf, User, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, X, Leaf, LogOut, ChevronDown } from 'lucide-react';
 import { auth, googleProvider, signInWithPopup, signOut } from '../lib/firebase';
 
 const Header = () => {

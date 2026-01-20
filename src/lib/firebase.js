@@ -43,6 +43,7 @@ const googleProvider = new GoogleAuthProvider();
 export {
     auth,
     db,
+    analytics,
     googleProvider,
     signInWithPopup,
     signOut,
