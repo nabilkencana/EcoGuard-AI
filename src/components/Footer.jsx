@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube, CheckCircle } from 'lucide-react';
 
@@ -59,14 +59,13 @@ const Footer = () => {
                         {/* Social Media */}
                         <div className="flex space-x-4">
                             {[Facebook, Twitter, Instagram, Linkedin, Youtube].map((Icon, index) => (
-                                <a
+                                <button
                                     key={index}
-                                    href="#"
                                     className="p-2 bg-gray-800 rounded-lg hover:bg-green-600 transition-colors duration-300"
                                     aria-label={`Follow us on ${Icon.name}`}
                                 >
                                     <Icon className="h-5 w-5" />
-                                </a>
+                                </button>
                             ))}
                         </div>
                     </div>
@@ -101,12 +100,11 @@ const Footer = () => {
                                 'Community',
                             ].map((item) => (
                                 <li key={item}>
-                                    <a
-                                        href="#"
+                                    <button
                                         className="text-gray-400 hover:text-green-400 transition-colors duration-300 block"
                                     >
                                         {item}
-                                    </a>
+                                    </button>
                                 </li>
                             ))}
                         </ul>

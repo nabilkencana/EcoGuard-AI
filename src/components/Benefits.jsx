@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingDown, Users, Globe, DollarSign, Shield, Target } from 'lucide-react';
 

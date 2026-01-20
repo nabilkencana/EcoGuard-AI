@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import {
     ArrowRight,
@@ -6,16 +5,12 @@ import {
     Shield,
     Zap,
     Droplets,
-    Sun,
     Wind,
     Thermometer,
-    Cloud,
     Leaf,
     TrendingUp,
     TrendingDown,
     CheckCircle,
-    Battery,
-    AlertTriangle,
     Clock,
     BarChart3
 } from 'lucide-react';

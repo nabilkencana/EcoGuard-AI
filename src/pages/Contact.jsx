@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, Clock, CheckCircle } from 'lucide-react';
 import emailjs from '@emailjs/browser';
@@ -122,9 +122,8 @@ const Contact = () => {
 
                         <div className="space-y-6">
                             {contactMethods.map((method, index) => (
-                                <a
+                                <button
                                     key={index}
-                                    href={method.link || '#'}
                                     target={method.link ? '_blank' : '_self'}
                                     rel="noopener noreferrer"
                                     className={`block p-6 rounded-2xl bg-gradient-to-br ${method.color} text-white hover:shadow-xl transition-shadow`}
@@ -138,7 +137,7 @@ const Contact = () => {
                                             <p className="text-white/90">{method.details}</p>
                                         </div>
                                     </div>
-                                </a>
+                                </button>
                             ))}
                         </div>
 
@@ -155,13 +154,12 @@ const Contact = () => {
                                     'Apakah perlu training?',
                                 ].map((faq, i) => (
                                     <li key={i}>
-                                        <a
-                                            href="#"
+                                        <button
                                             className="text-green-600 hover:text-green-700 font-medium flex items-center"
                                         >
                                             <CheckCircle className="h-4 w-4 mr-2" />
                                             {faq}
-                                        </a>
+                                        </button>
                                     </li>
                                 ))}
                             </ul>
@@ -317,13 +315,13 @@ const Contact = () => {
                                         />
                                         <label htmlFor="privacy" className="ml-2 text-sm text-gray-600">
                                             Saya setuju dengan{' '}
-                                            <a href="#" className="text-green-600 hover:text-green-700">
+                                            <button className="text-green-600 hover:text-green-700">
                                                 Kebijakan Privasi
-                                            </a>{' '}
+                                            </button>{' '}
                                             dan{' '}
-                                            <a href="#" className="text-green-600 hover:text-green-700">
+                                            <button className="text-green-600 hover:text-green-700">
                                                 Syarat Layanan
-                                            </a>
+                                            </button>
                                         </label>
                                     </div>
 

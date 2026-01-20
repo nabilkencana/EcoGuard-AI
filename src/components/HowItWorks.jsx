@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Cpu, Brain, TrendingUp, BarChart, CheckCircle } from 'lucide-react';
 

@@ -1,6 +1,5 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { Target, Users, Award, Globe, Clock, Shield } from 'lucide-react';
+import { Target, Users, Award, Globe } from 'lucide-react';
 import SectionTitle from '../components/common/SectionTitle';
 import Card from '../components/common/Card';
 

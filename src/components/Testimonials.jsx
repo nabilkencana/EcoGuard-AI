@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Quote, Star, ChevronLeft, ChevronRight, Building, User } from 'lucide-react';
+import { Quote, Star, ChevronLeft, ChevronRight, Building} from 'lucide-react';
 
 const Testimonials = () => {
     const [activeIndex, setActiveIndex] = useState(0);

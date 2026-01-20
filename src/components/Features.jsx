@@ -1,6 +1,5 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { Brain, Zap, Droplets, Cloud, Bell, TrendingUp, BarChart3, Users } from 'lucide-react';
+import { Brain, Zap, Droplets, Cloud, Bell, TrendingUp} from 'lucide-react';
 
 const Features = () => {
     const features = [
