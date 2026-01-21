@@ -292,7 +292,7 @@ Pesan ini dikirim melalui form kontak EcoGuard AI.
             <div className="container mx-auto px-4">
                 {/* Hero Section */}
                 <SectionTitle
-                    title="Hubungi Kami"
+                    title1="Hubungi Kami"
                     subtitle="Siap Membantu Transformasi Digital Anda"
                     description="Tim kami siap membantu Anda memahami bagaimana EcoGuard AI dapat mengoptimalkan operasional bisnis Anda."
                     align="center"

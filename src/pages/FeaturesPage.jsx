@@ -189,7 +189,7 @@ const FeaturesPage = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
                     viewport={{ once: true }}
-                    className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-12 text-white"
+                    className="bg-gradient-to-r from-green-600 to-green-500 rounded-3xl p-12 text-white"
                 >
                     <SectionTitle
                         title="Spesifikasi Teknis"
