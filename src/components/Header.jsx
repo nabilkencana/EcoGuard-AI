@@ -323,13 +323,6 @@ const Header = () => {
 
                                         {/* User Actions */}
                                         <Link
-                                            to="/dashboard"
-                                            className="block px-4 py-3 text-center text-green-600 font-medium border border-green-600 rounded-lg hover:bg-green-50"
-                                            onClick={() => setIsMenuOpen(false)}
-                                        >
-                                            Dashboard
-                                        </Link>
-                                        <Link
                                             to="/demo-request"
                                             className="block px-4 py-3 text-center bg-gradient-to-r from-green-600 to-green-500 text-white font-medium rounded-lg hover:from-green-700 hover:to-green-600"
                                             onClick={() => setIsMenuOpen(false)}

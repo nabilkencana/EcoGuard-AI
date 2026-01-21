@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Download, MessageSquare, CheckCircle, AlertCircle, Loader2, Send, User, Bot } from 'lucide-react';
+import { ArrowRight, Download, CheckCircle, AlertCircle, Loader2, Send, User, Bot, Bolt, Calendar, LightningBolt } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -19,6 +19,7 @@ const CTASection = () => {
         message: '',
         agreePrivacy: false
     });
+    
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formStatus, setFormStatus] = useState({
@@ -32,13 +33,22 @@ const CTASection = () => {
     const [currentMessage, setCurrentMessage] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
     const [aiStatus, setAiStatus] = useState({ success: false, message: '' });
-    const [userInfo, setUserInfo] = useState({
+    const [userProfile, setUserProfile] = useState({
         name: '',
         email: '',
         phone: '',
-        industry: 'manufacturing'
+        industry: 'manufacturing',
+        role: '',
+        experience: ''
     });
+    const [chatStats, setChatStats] = useState({
+        messages: 0,
+        duration: 0,
+        intents: []
+    });
+
     const chatContainerRef = useRef(null);
+    const sessionStartRef = useRef(new Date());
 
     // Initialize EmailJS
     useEffect(() => {
@@ -47,17 +57,44 @@ const CTASection = () => {
 
     // Initialize chat engine
     useEffect(() => {
-        const engine = new AIChatEngine(userInfo.industry);
+        const engine = new AIChatEngine(userProfile.industry);
+
+        // Set user profile if available
+        if (userProfile.name) {
+            engine.userProfile = { ...userProfile, experience_level: 'beginner' };
+        }
+
         setChatEngine(engine);
 
-        // Add welcome message
+        // Add personalized welcome message
         const welcomeMsg = {
             type: 'ai',
-            content: 'Halo! Saya AI assistant EcoGuard AI. Saya bisa bantu analisis kebutuhan energi dan air untuk bisnis Anda. \n\nBisa ceritakan kebutuhan spesifik Anda?',
+            content: `Halo${userProfile.name ? ' ' + userProfile.name : ''}! 👋
+
+Saya AI Assistant EcoGuard AI, siap membantu analisis kebutuhan energi dan air untuk bisnis ${userProfile.industry} Anda.
+
+Saya bisa bantu dengan:
+• 📊 Analisis penghematan potensial
+• 💰 Estimasi ROI & investment
+• 🛠️ Rekomendasi teknologi tepat
+• 📅 Timeline implementasi
+• 📈 Case study industri serupa
+
+*Bisa ceritakan kebutuhan spesifik Anda?*`,
             time: new Date().toISOString()
         };
+
         setConversation([welcomeMsg]);
-    }, [userInfo.industry]);
+        sessionStartRef.current = new Date();
+
+        // Start session timer
+        const timer = setInterval(() => {
+            const duration = Math.round((new Date() - sessionStartRef.current) / 1000);
+            setChatStats(prev => ({ ...prev, duration }));
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [userProfile.industry, userProfile.name]);
 
     // Scroll to bottom of chat
     useEffect(() => {
@@ -126,27 +163,57 @@ const CTASection = () => {
             const docRef = await addDoc(collection(db, "demo_requests"), submissionData);
             console.log('✅ Document written with ID:', docRef.id);
 
-            // Send Email via EmailJS
+            // Send Email via EmailJS - Perbaikan
             try {
+                console.log('📧 Attempting to send email via EmailJS...');
+
+                // Pastikan EmailJS sudah di-init
+                if (!window.emailjs || !window.emailjs.init) {
+                    console.log('🔄 Initializing EmailJS...');
+                    emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+                }
+
+                // Gunakan parameter yang sesuai dengan template DEMO_REQUEST
                 const emailParams = {
-                    to_name: submissionData.name,
+                    // Parameter yang wajib untuk recipient
+                    reply_to: submissionData.email, // Bisa juga to_email, email, user_email
                     to_email: submissionData.email,
+                    email: submissionData.email,
+
+                    // Data lainnya
+                    to_name: submissionData.name,
+                    name: submissionData.name,
                     company: submissionData.company,
                     phone: submissionData.phone,
                     industry: submissionData.industry,
-                    message: submissionData.message,
+                    message: submissionData.message || 'Tidak ada pesan tambahan',
                     date: new Date().toLocaleString('id-ID'),
-                    request_id: docRef.id.slice(0, 8)
+                    request_id: docRef.id.slice(0, 8),
+                    source: 'Demo Request Form',
+                    website: 'EcoGuard AI'
                 };
 
-                await emailjs.send(
+                console.log('📧 EmailJS params:', emailParams);
+
+                // Debug: Cek template
+                console.log('📧 Using template:', EMAILJS_CONFIG.TEMPLATES.DEMO_REQUEST);
+
+                const result = await emailjs.send(
                     EMAILJS_CONFIG.SERVICE_ID,
                     EMAILJS_CONFIG.TEMPLATES.DEMO_REQUEST,
                     emailParams
                 );
-                console.log('✅ Email sent via EmailJS');
+
+                console.log('✅ Email sent successfully:', result.status, result.text);
+
             } catch (emailError) {
-                console.log('Email sending skipped:', emailError);
+                console.log('⚠️ Email sending skipped (not critical):', emailError);
+                console.log('⚠️ Error details:', emailError.text);
+
+                // Debug lebih detail
+                if (emailError.text.includes('recipients address')) {
+                    console.log('⚠️ Issue: Template needs recipient parameter (to_email, reply_to, or email)');
+                }
             }
 
             // Send WhatsApp Notification
@@ -261,7 +328,7 @@ ${data.message}
         }
     };
 
-    // ==================== AI CHAT FUNCTIONS ====================
+    // ==================== ENHANCED AI CHAT FUNCTIONS ====================
 
     const handleSendMessage = async () => {
         if (!currentMessage.trim() || !chatEngine || isAILoading) return;
@@ -279,10 +346,10 @@ ${data.message}
         setAiStatus({ success: false, message: '' });
 
         try {
-            // Get AI response
+            // Generate AI response
             const { response, analysis } = chatEngine.generateResponse(currentMessage);
 
-            // Add AI response
+            // Add AI response with typing effect
             const aiMessage = {
                 type: 'ai',
                 content: response,
@@ -290,41 +357,81 @@ ${data.message}
                 analysis: analysis
             };
 
+            // Simulate typing delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+
             setConversation(prev => [...prev, aiMessage]);
 
-            // Auto-send summary after 3 messages
-            if (chatEngine.conversationHistory.length >= 3 && userInfo.email) {
-                setTimeout(sendConversationSummary, 1000);
+            // Update stats
+            setChatStats(prev => ({
+                ...prev,
+                messages: prev.messages + 1,
+                intents: [...new Set([...prev.intents, analysis.intent])]
+            }));
+
+            // Auto-suggest actions based on conversation stage
+            if (analysis.stage === 'pricing_talk' && userProfile.email) {
+                setTimeout(() => {
+                    setAiStatus({
+                        success: true,
+                        message: '💡 Mau saya kirim detailed proposal via email?'
+                    });
+                }, 1500);
+            }
+
+            // Auto-send summary after meaningful conversation
+            if (chatEngine.conversationHistory.length >= 4 && userProfile.email) {
+                setTimeout(() => {
+                    setAiStatus({
+                        success: true,
+                        message: '📋 Percakapan sudah cukup meaningful. Mau saya summarize dan kirim ke email?'
+                    });
+                }, 2000);
             }
 
         } catch (error) {
             console.error('AI error:', error);
             setAiStatus({
                 success: false,
-                message: '❌ Gagal memproses. Silakan coba lagi.'
+                message: '❌ Gagal memproses. Silakan coba lagi atau hubungi langsung tim kami.'
             });
         } finally {
             setIsAILoading(false);
         }
     };
 
+    // Enhanced conversation summary
     const sendConversationSummary = async () => {
-        if (!userInfo.email || !chatEngine || conversation.length < 2) return;
+        if (!userProfile.email || !chatEngine || conversation.length < 2) return;
 
         try {
             const summary = chatEngine.getSummary();
             const conversationText = conversation
-                .map(msg => `${msg.type === 'user' ? 'Anda' : 'AI'}: ${msg.content}`)
+                .map(msg => {
+                    const time = new Date(msg.time).toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    return `[${time}] ${msg.type === 'user' ? '👤 Anda' : '🤖 AI'}: ${msg.content}`;
+                })
                 .join('\n\n');
 
-            // Prepare email
+            // Prepare detailed email
             const emailParams = {
-                to_name: userInfo.name || 'Pelanggan',
-                to_email: userInfo.email,
+                reply_to: userProfile.email,
+                to_email: userProfile.email,
+                email: userProfile.email,
+                to_name: userProfile.name || 'Pelanggan',
+                name: userProfile.name || 'Pelanggan',
                 conversation_summary: conversationText,
-                industry: userInfo.industry,
+                industry: userProfile.industry,
                 date: new Date().toLocaleString('id-ID'),
-                next_steps: '1. Free site audit\n2. Detailed proposal\n3. ROI calculation\n4. Implementation timeline'
+                next_steps: '1. Free site audit\n2. Detailed proposal\n3. ROI calculation\n4. Implementation timeline',
+                pain_points: summary.pain_points?.join(', ') || 'Tidak terdeteksi',
+                budget_range: summary.budget || 'Belum dibahas',
+                timeline: summary.timeline || 'Flexible',
+                session_duration: summary.session_duration,
+                conversation_insights: `Detected intents: ${summary.detected_intents?.join(', ')}`
             };
 
             // Send via EmailJS
@@ -334,69 +441,172 @@ ${data.message}
                 emailParams
             );
 
-            // Save to Firebase
+            // Save to Firebase with more data
             if (db) {
                 await addDoc(collection(db, "ai_consultations"), {
-                    name: userInfo.name,
-                    email: userInfo.email,
-                    phone: userInfo.phone,
-                    industry: userInfo.industry,
+                    name: userProfile.name,
+                    email: userProfile.email,
+                    phone: userProfile.phone,
+                    industry: userProfile.industry,
+                    role: userProfile.role,
                     conversation: conversationText,
                     summary: summary,
-                    timestamp: serverTimestamp()
+                    chat_stats: chatStats,
+                    timestamp: serverTimestamp(),
+                    ai_analysis: chatEngine.conversationHistory.map(msg => msg.analysis).filter(Boolean)
                 });
             }
 
-            // Send WhatsApp notification to admin
+            // Send enhanced WhatsApp notification
             const whatsappMsg = `
-AI CONVERSATION SUMMARY
+🤖 AI CONVERSATION SUMMARY - ECOGUARD AI
 
-Name: ${userInfo.name || 'Not provided'}
-Email: ${userInfo.email}
-Industry: ${userInfo.industry}
-Conversation: ${conversation.length} messages
+👤 Contact: ${userProfile.name || 'Not provided'}
+📧 Email: ${userProfile.email}
+📱 Phone: ${userProfile.phone || 'Not provided'}
+🏭 Industry: ${userProfile.industry}
+💼 Role: ${userProfile.role || 'Not specified'}
 
-Stage: ${summary.stage}
-Confidence: ${summary.confidence || 'High'}
+📊 Conversation Stats:
+• Messages: ${conversation.length}
+• Duration: ${chatStats.duration} detik
+• Stage: ${summary.stage}
+• Pain Points: ${summary.pain_points?.join(', ') || 'None'}
 
-FOLLOW UP REQUIRED!
-            `.replace(/\n/g, '%0A');
+🎯 Key Insights:
+• Budget: ${summary.budget || 'Not discussed'}
+• Timeline: ${summary.timeline || 'Flexible'}
+• Decision Maker: ${summary.decision_maker ? 'Yes' : 'No'}
+
+💡 FOLLOW UP REQUIRED!
+Priority: ${summary.timeline === 'urgent' ? 'HIGH' : 'MEDIUM'}
+            `.trim().replace(/\n/g, '%0A');
 
             window.open(`https://wa.me/${WHATSAPP_CONFIG.BUSINESS_NUMBER}?text=${whatsappMsg}`, '_blank');
 
             setAiStatus({
                 success: true,
-                message: '✅ Summary dikirim ke email Anda. Tim akan follow up via WhatsApp.'
+                message: '✅ Summary berhasil dikirim ke email dan tim sudah di-notify via WhatsApp!'
             });
 
         } catch (error) {
             console.error('Summary error:', error);
-            downloadConversation();
+
+            // Enhanced fallback
+            downloadEnhancedConversation();
+
+            setAiStatus({
+                success: false,
+                message: '❌ Email gagal, namun chat sudah didownload dengan analysis lengkap.'
+            });
         }
     };
 
-    const downloadConversation = () => {
+    // Enhanced download with analysis
+    const downloadEnhancedConversation = () => {
         if (conversation.length === 0) return;
 
-        const content = conversation
-            .map(msg => `[${new Date(msg.time).toLocaleTimeString('id-ID')}] ${msg.type === 'user' ? 'Anda' : 'AI'}: ${msg.content}`)
-            .join('\n\n');
+        const summary = chatEngine?.getSummary() || {};
 
-        const blob = new Blob([content], { type: 'text/plain' });
+        const content = `ECO-GUARD AI CHAT SESSION
+========================
+Date: ${new Date().toLocaleString('id-ID')}
+Duration: ${chatStats.duration} detik
+User: ${userProfile.name || 'Anonymous'}
+Industry: ${userProfile.industry}
+Role: ${userProfile.role || 'Not specified'}
+
+CONVERSATION SUMMARY
+===================
+Stage: ${summary.stage || 'Unknown'}
+Pain Points: ${summary.pain_points?.join(', ') || 'None'}
+Budget Range: ${summary.budget || 'Not discussed'}
+Timeline: ${summary.timeline || 'Flexible'}
+Decision Maker: ${summary.decision_maker ? 'Yes' : 'No'}
+
+CHAT TRANSCRIPT
+===============
+${conversation.map((msg, idx) => {
+            const time = new Date(msg.time).toLocaleTimeString('id-ID');
+            const prefix = msg.type === 'user' ? '👤 ANDA' : '🤖 AI';
+            const analysis = msg.analysis ?
+                `\n    [Intent: ${msg.analysis.intent}, Confidence: ${(msg.analysis.confidence * 100).toFixed(0)}%]` : '';
+            return `${time} ${prefix}: ${msg.content}${analysis}`;
+        }).join('\n\n')}
+
+NEXT STEPS RECOMMENDATIONS
+=========================
+1. Free Site Audit
+2. Detailed ROI Analysis
+3. Technical Consultation
+4. Implementation Planning
+
+Contact EcoGuard AI:
+📞 ${WHATSAPP_CONFIG.BUSINESS_NUMBER}
+📧 support@ecoguard.ai
+`;
+
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Chat-EcoGuard-${new Date().getTime()}.txt`;
+        a.download = `EcoGuard-AI-Chat-${new Date().getTime()}.txt`;
         a.click();
 
         setAiStatus({
             success: true,
-            message: '✅ Chat didownload. Hubungi kami di WhatsApp untuk lanjutan.'
+            message: '✅ Chat dengan analysis lengkap telah didownload!'
         });
     };
 
+    // Enhanced quick replies dengan context awareness
+    const getContextualQuickReplies = () => {
+        const stage = chatEngine?.context?.stage || 'opening';
+
+        const replies = {
+            opening: [
+                "Berapa penghematan yang bisa dicapai?",
+                "Apa ROI period untuk bisnis saya?",
+                "Teknologi apa yang digunakan?",
+                "Berapa biaya implementasi?"
+            ],
+            discovery: [
+                "Butuh berapa sensor untuk gedung saya?",
+                "Ada case study di industri saya?",
+                "Proses implementasi seperti apa?",
+                "Berapa lama setup?"
+            ],
+            pricing_talk: [
+                "Bisa breakdown biayanya?",
+                "Ada financing options?",
+                "Bisa trial/demo dulu?",
+                "Bandingin dengan vendor lain"
+            ],
+            qualification: [
+                "Jadwalkan meeting dengan tim",
+                "Kirim proposal detail",
+                "Free site audit kapan?",
+                "Bicara dengan technical team"
+            ]
+        };
+
+        return replies[stage] || replies.opening;
+    };
+
+    // Reset chat session
+    const resetChat = () => {
+        setConversation([]);
+        setCurrentMessage('');
+        setAiStatus({ success: false, message: '' });
+        if (chatEngine) {
+            chatEngine.clearConversation();
+        }
+        sessionStartRef.current = new Date();
+        setChatStats({ messages: 0, duration: 0, intents: [] });
+    };
+
     const bookHumanConsultation = async () => {
-        if (!userInfo.email || !userInfo.name) {
+        if (!userProfile.email || !userProfile.name) {
             setAiStatus({
                 success: false,
                 message: 'Harap isi nama dan email untuk penjadwalan'
@@ -405,37 +615,45 @@ FOLLOW UP REQUIRED!
         }
 
         try {
-            // Send confirmation email
+            // Send confirmation email dengan parameter yang benar
             const emailParams = {
-                name: userInfo.name,
-                email: userInfo.email,
-                phone: userInfo.phone || 'Tidak diisi',
+                reply_to: userProfile.email,
+                to_email: userProfile.email,
+                email: userProfile.email,
+                name: userProfile.name,
+                phone: userProfile.phone || 'Tidak diisi',
                 company: 'Pelanggan',
                 schedule: 'Akan dikonfirmasi via WhatsApp',
                 date: new Date().toLocaleString('id-ID'),
-                conversation_length: conversation.length
+                conversation_length: conversation.length,
+                source: 'Booking Request'
             };
+
+            console.log('📧 Sending booking email with params:', emailParams);
+
+            // Gunakan template DEMO_REQUEST jika CONSULTATION_BOOKING tidak ada
+            const templateId = EMAILJS_CONFIG.TEMPLATES.CONSULTATION_BOOKING || EMAILJS_CONFIG.TEMPLATES.DEMO_REQUEST;
 
             await emailjs.send(
                 EMAILJS_CONFIG.SERVICE_ID,
-                EMAILJS_CONFIG.TEMPLATES.CONSULTATION_BOOKING,
+                templateId,
                 emailParams
             );
 
             // Send WhatsApp to admin
             const whatsappMessage = `
-📅 HUMAN CONSULTATION REQUEST
+HUMAN CONSULTATION REQUEST
 
-Name: ${userInfo.name}
-Email: ${userInfo.email}
-Phone: ${userInfo.phone || 'Not provided'}
-Industry: ${userInfo.industry}
+Name: ${userProfile.name}
+Email: ${userProfile.email}
+Phone: ${userProfile.phone || 'Not provided'}
+Industry: ${userProfile.industry}
 
 Chat Messages: ${conversation.length}
 Last Message: ${conversation[conversation.length - 1]?.content?.substring(0, 50) || 'No messages'}
 
-⏰ Please schedule within 24-48 hours
-            `.replace(/\n/g, '%0A');
+Please schedule within 24-48 hours
+        `.trim().replace(/\n/g, '%0A');
 
             window.open(`https://wa.me/${WHATSAPP_CONFIG.BUSINESS_NUMBER}?text=${whatsappMessage}`, '_blank');
 
@@ -455,27 +673,28 @@ Last Message: ${conversation[conversation.length - 1]?.content?.substring(0, 50)
         } catch (error) {
             console.error('Booking error:', error);
 
-            // Fallback to direct WhatsApp
+            // Fallback to direct WhatsApp tanpa email
             const fallbackMessage = `
-📅 BOOKING REQUEST
+📅 BOOKING REQUEST - EMAIL FAILED
 
-Name: ${userInfo.name}
-Email: ${userInfo.email}
-Phone: ${userInfo.phone || 'Not provided'}
+Name: ${userProfile.name}
+Email: ${userProfile.email}
+Phone: ${userProfile.phone || 'Not provided'}
 
 Please schedule a consultation call.
-            `.replace(/\n/g, '%0A');
+Email sending failed: ${error.message}
+        `.trim().replace(/\n/g, '%0A');
 
             window.open(`https://wa.me/${WHATSAPP_CONFIG.BUSINESS_NUMBER}?text=${fallbackMessage}`, '_blank');
 
             setAiStatus({
                 success: true,
-                message: 'WhatsApp terbuka. Silakan kirim pesan untuk booking.'
+                message: 'WhatsApp terbuka. Silakan kirim pesan untuk booking (email gagal).'
             });
         }
     };
 
-    // Quick reply buttons
+    // Quick reply buttons untuk AI chat yang lama (backward compatibility)
     const quickReplies = [
         "Berapa penghematan yang bisa dicapai?",
         "Apa ROI period untuk bisnis saya?",
@@ -484,6 +703,79 @@ Please schedule a consultation call.
         "Ada case study di industri saya?",
         "Proses implementasi seperti apa?"
     ];
+
+    // Enhanced user info form component
+    const UserProfileForm = ({ userProfile, setUserProfile }) => {
+        return (
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 md:p-6 rounded-xl border border-blue-200 mb-4">
+                <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center">
+                    <User className="h-4 w-4 mr-2 text-blue-600" />
+                    Profil Anda (Opsional, untuk personalisasi)
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    <input
+                        type="text"
+                        placeholder="Nama"
+                        value={userProfile.name}
+                        onChange={(e) => setUserProfile(prev => ({ ...prev, name: e.target.value }))}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={userProfile.email}
+                        onChange={(e) => setUserProfile(prev => ({ ...prev, email: e.target.value }))}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <input
+                        type="tel"
+                        placeholder="WhatsApp"
+                        value={userProfile.phone}
+                        onChange={(e) => setUserProfile(prev => ({ ...prev, phone: e.target.value }))}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <select
+                        value={userProfile.role}
+                        onChange={(e) => setUserProfile(prev => ({ ...prev, role: e.target.value }))}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                        <option value="">Posisi/Role</option>
+                        <option value="owner">Owner/Pemilik</option>
+                        <option value="director">Direktur</option>
+                        <option value="manager">Manajer</option>
+                        <option value="engineer">Engineer</option>
+                        <option value="consultant">Konsultan</option>
+                        <option value="other">Lainnya</option>
+                    </select>
+                    <select
+                        value={userProfile.industry}
+                        onChange={(e) => setUserProfile(prev => ({ ...prev, industry: e.target.value }))}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                        <option value="manufacturing">Manufaktur</option>
+                        <option value="property">Property</option>
+                        <option value="retail">Retail</option>
+                        <option value="hospitality">Hospitality</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="education">Education</option>
+                    </select>
+                </div>
+
+                {userProfile.name && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="mt-3 text-xs text-green-700 bg-green-50 p-2 rounded-lg"
+                    >
+                        ✅ Chat akan dipersonalisasi untuk {userProfile.name} ({userProfile.role || 'Tidak spesifik'}) di industri {userProfile.industry}
+                        {userProfile.email && ` • Email: ${userProfile.email}`}
+                        {userProfile.phone && ` • WA: ${userProfile.phone}`}
+                    </motion.div>
+                )}
+            </div>
+        );
+    }
 
     // ==================== RENDER ====================
 
@@ -653,22 +945,69 @@ Please schedule a consultation call.
                                             </div>
                                         </div>
 
-                                        <div>
-                                            <select
-                                                name="industry"
-                                                value={formData.industry}
-                                                onChange={handleInputChange}
-                                                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-green-200 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent text-sm md:text-base"
-                                            >
-                                                <option value="">Pilih Industri</option>
-                                                <option value="manufacturing">Manufaktur</option>
-                                                <option value="property">Property & Real Estate</option>
-                                                <option value="retail">Retail & Mall</option>
-                                                <option value="hospitality">Hospitality & Hotel</option>
-                                                <option value="healthcare">Healthcare</option>
-                                                <option value="education">Education</option>
-                                                <option value="other">Lainnya</option>
-                                            </select>
+                                        <div className="relative group">
+                                            <label className="block text-sm font-medium text-green-200 mb-2 pl-1">
+                                                Jenis Industri *
+                                            </label>
+
+                                            <div className="relative">
+                                                <select
+                                                    name="industry"
+                                                    value={formData.industry}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    className="w-full px-4 py-3.5 bg-white/10 border border-white/30 rounded-xl text-white placeholder-green-200/70 focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-transparent text-sm md:text-base appearance-none cursor-pointer transition-all duration-300 hover:bg-white/15 group-hover:border-white/40"
+                                                >
+                                                    <option value="" className="text-gray-700">Pilih jenis industri Anda</option>
+                                                    <option value="manufacturing" className="text-gray-700">🏭 Manufaktur & Pabrik</option>
+                                                    <option value="property" className="text-gray-700">🏢 Property & Real Estate</option>
+                                                    <option value="retail" className="text-gray-700">🛍️ Retail & Mall</option>
+                                                    <option value="hospitality" className="text-gray-700">🏨 Hospitality & Hotel</option>
+                                                    <option value="healthcare" className="text-gray-700">🏥 Healthcare & Rumah Sakit</option>
+                                                    <option value="education" className="text-gray-700">🎓 Education & Pendidikan</option>
+                                                    <option value="office" className="text-gray-700">💼 Gedung Perkantoran</option>
+                                                    <option value="factory" className="text-gray-700">⚙️ Pabrik & Factory</option>
+                                                    <option value="mall" className="text-gray-700">🏬 Mall & Pusat Perbelanjaan</option>
+                                                    <option value="school" className="text-gray-700">📚 Sekolah & Kampus</option>
+                                                    <option value="hospital" className="text-gray-700">🏥 Rumah Sakit & Klinik</option>
+                                                    <option value="other" className="text-gray-700">🔧 Lainnya</option>
+                                                </select>
+
+                                                {/* Custom dropdown arrow */}
+                                                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                                    <svg className="w-5 h-5 text-green-200/70 group-hover:text-green-100 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </div>
+
+                                                {/* Focus highlight */}
+                                                <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-2 ring-amber-400/30"></div>
+                                            </div>
+
+                                            {/* Selected value indicator */}
+                                            {formData.industry && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: -5 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="mt-2 flex items-center text-xs text-green-300"
+                                                >
+                                                    <CheckCircle className="h-3 w-3 mr-1.5 text-amber-300" />
+                                                    <span className="font-medium">
+                                                        {formData.industry === 'manufacturing' && '🏭 Manufaktur dipilih'}
+                                                        {formData.industry === 'property' && '🏢 Property & Real Estate dipilih'}
+                                                        {formData.industry === 'retail' && '🛍️ Retail & Mall dipilih'}
+                                                        {formData.industry === 'hospitality' && '🏨 Hospitality & Hotel dipilih'}
+                                                        {formData.industry === 'healthcare' && '🏥 Healthcare & Rumah Sakit dipilih'}
+                                                        {formData.industry === 'education' && '🎓 Education & Pendidikan dipilih'}
+                                                        {formData.industry === 'office' && '💼 Gedung Perkantoran dipilih'}
+                                                        {formData.industry === 'factory' && '⚙️ Pabrik & Factory dipilih'}
+                                                        {formData.industry === 'mall' && '🏬 Mall & Pusat Perbelanjaan dipilih'}
+                                                        {formData.industry === 'school' && '📚 Sekolah & Kampus dipilih'}
+                                                        {formData.industry === 'hospital' && '🏥 Rumah Sakit & Klinik dipilih'}
+                                                        {formData.industry === 'other' && '🔧 Lainnya dipilih'}
+                                                    </span>
+                                                </motion.div>
+                                            )}
                                         </div>
 
                                         <div>
@@ -731,206 +1070,324 @@ Please schedule a consultation call.
                         </div>
                     </motion.div>
 
-                    {/* AI Chat Consultation */}
-                    <div className="items-center mt-12">
+                    {/* Enhanced AI Chat Consultation */}
+                    <div className="mt-8 md:mt-12">
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6, delay: 0.2 }}
                             viewport={{ once: true }}
-                            className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100"
+                            className="bg-white rounded-xl md:rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
                         >
-                            <div className="flex items-start space-x-4">
-                                <div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-xl">
-                                    <MessageSquare className="h-6 w-6 text-white" />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-xl font-bold text-gray-900">
-                                            Chat Konsultasi AI Real
-                                        </h3>
-                                        <div className="flex items-center gap-2">
-                                            <div className="px-2 py-1 bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-600 text-xs font-medium rounded-full">
-                                                Context-Aware AI
-                                            </div>
+                            {/* Chat Header */}
+                            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-4 md:p-6 text-white">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="p-2 bg-white/20 rounded-xl">
+                                            <Bot className="h-6 w-6" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg md:text-xl font-bold">EcoGuard AI Assistant</h3>
+                                            <p className="text-blue-100 text-sm">Context-aware AI dengan data real industri</p>
                                         </div>
                                     </div>
 
-                                    {/* User Info Form */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-4 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="flex items-center text-xs bg-white/20 px-2 py-1 rounded-full">
+                                            <div className="h-1.5 w-1.5 bg-green-400 rounded-full animate-pulse mr-1.5"></div>
+                                            <span>AI Active</span>
+                                        </div>
+                                        <button
+                                            onClick={resetChat}
+                                            className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full transition-colors"
+                                        >
+                                            🔄 Restart
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Stats Bar */}
+                                <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                                    <div className="bg-white/10 p-2 rounded-lg text-center">
+                                        <div className="font-bold">{chatStats.messages}</div>
+                                        <div className="text-blue-200">Messages</div>
+                                    </div>
+                                    <div className="bg-white/10 p-2 rounded-lg text-center">
+                                        <div className="font-bold">{Math.floor(chatStats.duration / 60)}:{String(chatStats.duration % 60).padStart(2, '0')}</div>
+                                        <div className="text-blue-200">Duration</div>
+                                    </div>
+                                    <div className="bg-white/10 p-2 rounded-lg text-center">
+                                        <div className="font-bold">{chatStats.intents.length}</div>
+                                        <div className="text-blue-200">Topics</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Chat Body */}
+                            <div className="p-4 md:p-6">
+
+                                {/* Status Message */}
+                                {aiStatus.message && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className={`p-4 mb-4 rounded-lg ${aiStatus.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}
+                                    >
+                                        <div className="flex items-center">
+                                            {aiStatus.success ? (
+                                                <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                                            ) : (
+                                                <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0" />
+                                            )}
+                                            <span className="text-sm">{aiStatus.message}</span>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* User Profile Form - INLINE */}
+                                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 md:p-6 rounded-xl border border-blue-200 mb-4">
+                                    <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center">
+                                        <User className="h-4 w-4 mr-2 text-blue-600" />
+                                        Profil Anda (Opsional, untuk personalisasi)
+                                    </h4>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                                         <input
                                             type="text"
-                                            placeholder="Nama Anda"
-                                            value={userInfo.name}
-                                            onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
-                                            className="px-3 py-2 border border-gray-200 rounded text-sm"
+                                            placeholder="Nama"
+                                            value={userProfile.name}
+                                            onChange={(e) => setUserProfile(prev => ({ ...prev, name: e.target.value }))}
+                                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                         />
                                         <input
                                             type="email"
-                                            placeholder="Email (untuk hasil)"
-                                            value={userInfo.email}
-                                            onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-                                            className="px-3 py-2 border border-gray-200 rounded text-sm"
+                                            placeholder="Email"
+                                            value={userProfile.email}
+                                            onChange={(e) => setUserProfile(prev => ({ ...prev, email: e.target.value }))}
+                                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                        />
+                                        <input
+                                            type="tel"
+                                            placeholder="WhatsApp"
+                                            value={userProfile.phone}
+                                            onChange={(e) => setUserProfile(prev => ({ ...prev, phone: e.target.value }))}
+                                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                         />
                                         <select
-                                            value={userInfo.industry}
-                                            onChange={(e) => setUserInfo({ ...userInfo, industry: e.target.value })}
-                                            className="px-3 py-2 border border-gray-200 rounded text-sm"
+                                            value={userProfile.role}
+                                            onChange={(e) => setUserProfile(prev => ({ ...prev, role: e.target.value }))}
+                                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                        >
+                                            <option value="">Posisi/Role</option>
+                                            <option value="owner">Owner/Pemilik</option>
+                                            <option value="director">Direktur</option>
+                                            <option value="manager">Manajer</option>
+                                            <option value="engineer">Engineer</option>
+                                            <option value="consultant">Konsultan</option>
+                                            <option value="other">Lainnya</option>
+                                        </select>
+                                        <select
+                                            value={userProfile.industry}
+                                            onChange={(e) => setUserProfile(prev => ({ ...prev, industry: e.target.value }))}
+                                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                         >
                                             <option value="manufacturing">Manufaktur</option>
-                                            <option value="property">Gedung Perkantoran</option>
-                                            <option value="retail">Mall & Retail</option>
-                                            <option value="hospitality">Hotel</option>
+                                            <option value="property">Property</option>
+                                            <option value="retail">Retail</option>
+                                            <option value="hospitality">Hospitality</option>
+                                            <option value="healthcare">Healthcare</option>
+                                            <option value="education">Education</option>
                                         </select>
                                     </div>
 
-                                    {/* Status Message */}
-                                    {aiStatus.message && (
-                                        <div className={`p-3 rounded-lg mb-4 ${aiStatus.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-                                            <div className="flex items-center">
-                                                {aiStatus.success ? (
-                                                    <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                                                ) : (
-                                                    <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
-                                                )}
-                                                <span className="text-sm">{aiStatus.message}</span>
+                                    {userProfile.name && (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="mt-3 text-xs text-green-700 bg-green-50 p-2 rounded-lg"
+                                        >
+                                            ✅ Chat akan dipersonalisasi untuk {userProfile.name} ({userProfile.role || 'Tidak spesifik'}) di industri {userProfile.industry}
+                                            {userProfile.email && ` • Email: ${userProfile.email}`}
+                                            {userProfile.phone && ` • WA: ${userProfile.phone}`}
+                                        </motion.div>
+                                    )}
+                                </div>
+
+                                {/* Chat Container */}
+                                <div
+                                    ref={chatContainerRef}
+                                    className="h-64 md:h-80 overflow-y-auto mb-4 p-3 md:p-4 bg-gray-50 rounded-xl border border-gray-200"
+                                >
+                                    {conversation.map((msg, idx) => (
+                                        <motion.div
+                                            key={idx}
+                                            initial={{ opacity: 0, y: msg.type === 'user' ? 10 : -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className={`mb-4 ${msg.type === 'user' ? 'text-right' : ''}`}
+                                        >
+                                            <div className={`inline-flex items-start max-w-full sm:max-w-[85%] ${msg.type === 'user' ? 'flex-row-reverse' : ''}`}>
+                                                {/* Avatar */}
+                                                <div className={`p-2 rounded-full ${msg.type === 'user' ? 'bg-blue-100 ml-2 md:ml-3' : 'bg-gradient-to-br from-blue-100 to-cyan-100 mr-2 md:mr-3'} flex-shrink-0`}>
+                                                    {msg.type === 'user' ? (
+                                                        <User className="h-4 w-4 text-blue-600" />
+                                                    ) : (
+                                                        <Bot className="h-4 w-4 text-blue-600" />
+                                                    )}
+                                                </div>
+
+                                                {/* Message */}
+                                                <div className={`p-3 md:p-4 rounded-2xl ${msg.type === 'user' ? 'bg-blue-500 text-white rounded-br-none' : 'bg-white border border-gray-200 rounded-bl-none'} flex-1`}>
+                                                    {/* AI Analysis Badge */}
+                                                    {msg.type === 'ai' && msg.analysis && (
+                                                        <div className="mb-2 flex items-center text-xs">
+                                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                                                                {msg.analysis.intent?.replace('_', ' ') || 'general'} • {Math.round((msg.analysis.confidence || 0) * 100)}% confident
+                                                            </span>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="whitespace-pre-wrap text-sm md:text-base">
+                                                        {msg.content}
+                                                    </div>
+
+                                                    {/* Timestamp */}
+                                                    <div className={`text-xs mt-2 ${msg.type === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>
+                                                        {new Date(msg.time).toLocaleTimeString('id-ID', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                        {msg.analysis?.stage && ` • ${msg.analysis.stage}`}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+
+                                    {/* AI Loading Animation */}
+                                    {isAILoading && (
+                                        <div className="flex items-center">
+                                            <div className="p-2 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 mr-2 md:mr-3">
+                                                <Bot className="h-4 w-4 text-blue-600" />
+                                            </div>
+                                            <div className="p-3 md:p-4 bg-white border border-gray-200 rounded-2xl rounded-bl-none">
+                                                <div className="flex items-center space-x-1">
+                                                    <div className="h-2 w-2 bg-blue-400 rounded-full animate-bounce"></div>
+                                                    <div className="h-2 w-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                    <div className="h-2 w-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                                    <span className="text-xs text-gray-500 ml-2">AI thinking...</span>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
+                                </div>
 
-                                    {/* Chat Container */}
-                                    <div
-                                        ref={chatContainerRef}
-                                        className="h-64 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                                    >
-                                        {conversation.map((msg, idx) => (
-                                            <div key={idx} className={`mb-3 ${msg.type === 'user' ? 'text-right' : ''}`}>
-                                                <div className={`inline-flex items-start max-w-[80%] ${msg.type === 'user' ? 'flex-row-reverse' : ''}`}>
-                                                    <div className={`p-2 rounded-full ${msg.type === 'user' ? 'bg-blue-100 ml-2' : 'bg-gray-100 mr-2'}`}>
-                                                        {msg.type === 'user' ? (
-                                                            <User className="h-3 w-3 text-blue-600" />
-                                                        ) : (
-                                                            <Bot className="h-3 w-3 text-gray-600" />
-                                                        )}
-                                                    </div>
-                                                    <div className={`p-3 rounded-lg ${msg.type === 'user' ? 'bg-blue-500 text-white' : 'bg-white border border-gray-200'}`}>
-                                                        <p className="text-sm">{msg.content}</p>
-                                                        <p className={`text-xs mt-1 ${msg.type === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>
-                                                            {new Date(msg.time).toLocaleTimeString('id-ID', {
-                                                                hour: '2-digit',
-                                                                minute: '2-digit'
-                                                            })}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-
-                                        {isAILoading && (
-                                            <div className="flex items-center">
-                                                <div className="p-2 rounded-full bg-gray-100 mr-2">
-                                                    <Bot className="h-3 w-3 text-gray-600" />
-                                                </div>
-                                                <div className="p-3 rounded-lg bg-white border border-gray-200">
-                                                    <div className="flex space-x-1">
-                                                        <div className="h-2 w-2 bg-gray-300 rounded-full animate-bounce"></div>
-                                                        <div className="h-2 w-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                                        <div className="h-2 w-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
+                                {/* Quick Replies */}
+                                <div className="mb-4">
+                                    <div className="flex items-center text-xs text-gray-500 mb-2">
+                                        <Bolt className="h-3 w-3 mr-1" />
+                                        Quick replies berdasarkan percakapan:
                                     </div>
-
-                                    {/* Quick Replies */}
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {quickReplies.map((reply, idx) => (
-                                            <button
+                                    <div className="flex flex-wrap gap-2">
+                                        {getContextualQuickReplies().map((reply, idx) => (
+                                            <motion.button
                                                 key={idx}
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
                                                 onClick={() => {
                                                     setCurrentMessage(reply);
                                                     setTimeout(handleSendMessage, 100);
                                                 }}
-                                                className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full border border-gray-300 transition-colors"
+                                                className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium rounded-full border border-blue-200 transition-all hover:shadow-sm"
                                             >
                                                 {reply}
-                                            </button>
+                                            </motion.button>
                                         ))}
                                     </div>
+                                </div>
 
-                                    {/* Message Input */}
-                                    <div className="flex gap-2 mb-4">
-                                        <input
-                                            type="text"
-                                            value={currentMessage}
-                                            onChange={(e) => setCurrentMessage(e.target.value)}
-                                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                            placeholder="Tanyakan tentang penghematan, ROI, teknologi, dll..."
-                                            className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent text-sm"
-                                            disabled={isAILoading}
-                                        />
-                                        <button
-                                            onClick={handleSendMessage}
-                                            disabled={isAILoading || !currentMessage.trim()}
-                                            className="px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg hover:from-blue-600 hover:to-cyan-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            {isAILoading ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                                <Send className="h-4 w-4" />
-                                            )}
-                                        </button>
-                                    </div>
+                                {/* Message Input */}
+                                <div className="flex gap-2 mb-4">
+                                    <input
+                                        type="text"
+                                        value={currentMessage}
+                                        onChange={(e) => setCurrentMessage(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                                        placeholder="Tanyakan tentang efisiensi, ROI, teknologi, atau kebutuhan spesifik..."
+                                        className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent text-sm"
+                                        disabled={isAILoading}
+                                    />
+                                    <button
+                                        onClick={handleSendMessage}
+                                        disabled={isAILoading || !currentMessage.trim()}
+                                        className="px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 shadow-sm"
+                                    >
+                                        {isAILoading ? (
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                        ) : (
+                                            <Send className="h-5 w-5" />
+                                        )}
+                                    </button>
+                                </div>
 
-                                    {/* Action Buttons */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <button
-                                            onClick={sendConversationSummary}
-                                            disabled={!userInfo.email || conversation.length < 2}
-                                            className="py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center text-sm disabled:opacity-50"
-                                        >
-                                            <Send className="h-4 w-4 mr-2" />
-                                            Kirim ke Email
-                                        </button>
+                                {/* Action Buttons */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <button
+                                        onClick={sendConversationSummary}
+                                        disabled={!userProfile.email || conversation.length < 2}
+                                        className="py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center text-sm disabled:opacity-50 shadow-sm"
+                                    >
+                                        <Send className="h-4 w-4 mr-2" />
+                                        Kirim Summary & Proposal
+                                    </button>
 
-                                        <button
-                                            onClick={downloadConversation}
-                                            disabled={conversation.length === 0}
-                                            className="py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all flex items-center justify-center text-sm disabled:opacity-50"
-                                        >
-                                            <Download className="h-4 w-4 mr-2" />
-                                            Download Chat
-                                        </button>
+                                    <button
+                                        onClick={downloadEnhancedConversation}
+                                        disabled={conversation.length === 0}
+                                        className="py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center text-sm disabled:opacity-50"
+                                    >
+                                        <Download className="h-4 w-4 mr-2" />
+                                        Download Chat + Analysis
+                                    </button>
 
-                                        <button
-                                            onClick={bookHumanConsultation}
-                                            disabled={!userInfo.email}
-                                            className="py-3 border border-green-300 text-green-700 rounded-lg hover:bg-green-50 transition-all flex items-center justify-center text-sm disabled:opacity-50"
-                                        >
-                                            <MessageSquare className="h-4 w-4 mr-2" />
-                                            Booking Ahli
-                                        </button>
-                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            // Trigger human consultation
+                                            if (userProfile.email) {
+                                                bookHumanConsultation();
+                                            } else {
+                                                setAiStatus({
+                                                    success: false,
+                                                    message: 'Harap isi email untuk penjadwalan meeting'
+                                                });
+                                            }
+                                        }}
+                                        disabled={!userProfile.email}
+                                        className="py-3 border border-green-300 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-all flex items-center justify-center text-sm disabled:opacity-50"
+                                    >
+                                        <Calendar className="h-4 w-4 mr-2" />
+                                        Schedule Live Demo
+                                    </button>
+                                </div>
 
-                                    {/* Features */}
-                                    <div className="mt-6 pt-6 border-t border-gray-200">
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                            <div className="text-center">
-                                                <div className="text-xs font-medium text-gray-700">🤖 AI Real</div>
-                                                <div className="text-xs text-gray-500">Berdasar data nyata</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-xs font-medium text-gray-700">📧 Email Otomatis</div>
-                                                <div className="text-xs text-gray-500">Summary langsung ke inbox</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-xs font-medium text-gray-700">📱 WhatsApp Alert</div>
-                                                <div className="text-xs text-gray-500">Tim langsung notified</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-xs font-medium text-gray-700">💬 Context-Aware</div>
-                                                <div className="text-xs text-gray-500">Ingat percakapan sebelumnya</div>
-                                            </div>
+                                {/* AI Capabilities */}
+                                <div className="mt-6 pt-6 border-t border-gray-200">
+                                    <div className="text-center text-sm text-gray-600 mb-3">🤖 AI Capabilities:</div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+                                            <div className="text-xs font-medium text-gray-900">Context-Aware</div>
+                                            <div className="text-xs text-gray-600 mt-1">Ingat percakapan sebelumnya</div>
+                                        </div>
+                                        <div className="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-100">
+                                            <div className="text-xs font-medium text-gray-900">Real Data</div>
+                                            <div className="text-xs text-gray-600 mt-1">Data industri terkini</div>
+                                        </div>
+                                        <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+                                            <div className="text-xs font-medium text-gray-900">Smart Analysis</div>
+                                            <div className="text-xs text-gray-600 mt-1">Deteksi intent & kebutuhan</div>
+                                        </div>
+                                        <div className="text-center p-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-100">
+                                            <div className="text-xs font-medium text-gray-900">Learning AI</div>
+                                            <div className="text-xs text-gray-600 mt-1">Makin paham makin lama</div>
                                         </div>
                                     </div>
                                 </div>

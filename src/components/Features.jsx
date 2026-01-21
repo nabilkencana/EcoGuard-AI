@@ -116,11 +116,16 @@ const Features = () => {
                                 di fasilitas Anda.
                             </p>
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
                             {['IoT Devices', 'Cloud API', 'ERP', 'Mobile App'].map((tech, i) => (
-                                <div key={i} className="bg-white/20 px-6 py-3 rounded-xl backdrop-blur-sm">
+                                <div
+                                    key={i}
+                                    className="bg-white/20 px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl backdrop-blur-sm flex-1 min-w-[calc(50%-0.75rem)] sm:min-w-0"
+                                >
                                     <div className="text-center">
-                                        <div className="text-sm font-medium">{tech}</div>
+                                        <div className="text-xs sm:text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                                            {tech}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

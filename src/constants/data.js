@@ -202,5 +202,5 @@ export const contactInfo = {
     email: 'support@ecoguard.ai',
     phone: '+62 21 1234 5678',
     address: 'Jl. Sudirman No. 123, Jakarta Selatan, Indonesia',
-    workingHours: 'Senin - Jumat: 09:00 - 17:00',
+    workingHours: 'Senin - Jumat: 06:00 - 16:00',
 };
