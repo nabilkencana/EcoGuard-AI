@@ -84,7 +84,7 @@ const About = () => {
             name: 'Nauval Luthf Hisyam',
             role: 'Developer IOT',
             description: 'Pembuatan prototype IOT dan Pembuatan blueprint IOT',
-            image: '/images/team/nopal.jpg',
+            image: '/images/team/nopal.jpeg',
             color: 'from-orange-400 to-red-500',
             social: {
                 linkedin: 'https://www.linkedin.com/in/nauval-faiz-0b1436339',
