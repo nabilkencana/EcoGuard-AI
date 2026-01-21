@@ -16,6 +16,7 @@ const Home = () => {
             <CTASection />
         </>
     );
+    
 };
 
 export default Home;
