@@ -1,84 +1,119 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube, CheckCircle } from 'lucide-react';
+import { Leaf, Mail, Phone, MapPin, Facebook, Linkedin, Twitter, Instagram, CheckCircle, Loader2 } from 'lucide-react';
 
 const Footer = () => {
     const [email, setEmail] = useState('');
-    const [subscribed, setSubscribed] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState('');
 
     const handleSubscribe = async (e) => {
         e.preventDefault();
-
+        
         if (!email || !email.includes('@')) {
-            alert('Masukkan alamat email yang valid');
+            setError('Masukkan email yang valid');
             return;
         }
 
-        setLoading(true);
+        setIsLoading(true);
+        setError('');
 
-        // Simulasi API call untuk subscribe
+        // Simulasi API call
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Subscribed:', email);
-            setSubscribed(true);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Success state
+            setIsSuccess(true);
             setEmail('');
-
-            // Reset status setelah 3 detik
+            
+            // Reset success message setelah 5 detik
             setTimeout(() => {
-                setSubscribed(false);
-            }, 3000);
-        } catch (error) {
-            console.error('Subscription error:', error);
-            alert('Terjadi kesalahan. Silakan coba lagi.');
+                setIsSuccess(false);
+            }, 5000);
+            
+            console.log('Email subscribed:', email);
+            
+        } catch (err) {
+            setError('Gagal berlangganan. Silakan coba lagi.');
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     return (
-        <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white">
-            <div className="container mx-auto px-4 py-16">
-                <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12">
-                    {/* Brand Column */}
-                    <div className="lg:col-span-2">
+        <footer className="bg-gray-900 text-white">
+            {/* Main Footer */}
+            <div className="container mx-auto px-4 py-12">
+                <div className="grid md:grid-cols-4 gap-8">
+                    {/* Brand Section */}
+                    <div className="md:col-span-2 lg:col-span-1">
                         <div className="flex items-center space-x-3 mb-6">
-                            <div className="p-2 bg-gradient-to-br from-green-500 to-green-400 rounded-xl">
+                            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
                                 <Leaf className="h-6 w-6" />
                             </div>
                             <div>
-                                <h2 className="text-2xl font-bold">EcoGuard AI</h2>
-                                <p className="text-gray-400 text-sm">Satpam Lingkungan Digital</p>
+                                <h2 className="text-xl font-bold">EcoGuard AI</h2>
+                                <p className="text-gray-400 text-sm">Intelligent Energy Management</p>
                             </div>
                         </div>
-                        <p className="text-gray-400 mb-8 max-w-md">
-                            Aplikasi berbasis Artificial Intelligence untuk efisiensi sumber daya
-                            dan ketahanan lingkungan berkelanjutan. Inovasi Pertamina Eco-Innovation Competition 2026.
+                        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Solusi AI untuk efisiensi energi dan pengelolaan sumber daya berkelanjutan bagi industri dan bisnis.
                         </p>
-
-                        {/* Social Media */}
-                        <div className="flex space-x-4">
-                            {[Facebook, Twitter, Instagram, Linkedin, Youtube].map((Icon, index) => (
-                                <button
-                                    key={index}
-                                    className="p-2 bg-gray-800 rounded-lg hover:bg-green-600 transition-colors duration-300"
-                                    aria-label={`Follow us on ${Icon.name}`}
-                                >
-                                    <Icon className="h-5 w-5" />
-                                </button>
-                            ))}
-                        </div>
+                     
                     </div>
 
                     {/* Quick Links */}
                     <div>
-                        <h3 className="text-lg font-bold mb-6">Menu</h3>
+    <h3 className="font-semibold text-gray-200 mb-4 text-sm uppercase tracking-wider">
+        Jelajahi
+    </h3>
+    <ul className="space-y-3">
+        {[
+            { name: 'Beranda', href: '/' },
+            { name: 'Fitur', href: '/features' },
+            { name: 'Cara Kerja', href: '/about' },
+            { name: 'Manfaat', href: '/benefits' },
+            { name: 'Kontak', href: '/contact' },
+        ].map((item) => (
+            <li key={item.name}>
+                <a
+                    href={item.href}
+                    className="text-gray-400 hover:text-green-400 text-sm transition-colors block hover:translate-x-1 duration-300"
+                    onClick={(e) => {
+                        // Untuk internal anchor links, smooth scroll
+                        if (item.href.includes('#')) {
+                            e.preventDefault();
+                            const element = document.querySelector(item.href);
+                            if (element) {
+                                element.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }
+                    }}
+                >
+                    {item.name}
+                </a>
+            </li>
+        ))}
+    </ul>
+</div>
+                    {/* Solutions */}
+                    <div>
+                        <h3 className="font-semibold text-gray-200 mb-4 text-sm uppercase tracking-wider">
+                            Manfaat
+                        </h3>
                         <ul className="space-y-3">
-                            {['Beranda', 'Fitur', 'Cara Kerja', 'Manfaat', 'Harga', 'Kontak'].map((item) => (
+                            {[
+                                'Penghematan Biaya',
+                                'Kepatuhan Regulasi',
+                                'Dampak Lingkungan',
+                                'Efisiensi Operasional',
+                                'Keunggulan Kompetitif',
+                            ].map((item) => (
                                 <li key={item}>
                                     <Link
-                                        to={`/${item.toLowerCase() === 'beranda' ? '' : item.toLowerCase().replace(' ', '-')}`}
-                                        className="text-gray-400 hover:text-green-400 transition-colors duration-300 block"
+                                        to="#"
+                                        className="text-gray-400 hover:text-green-400 text-sm transition-colors block hover:translate-x-1 duration-300"
                                     >
                                         {item}
                                     </Link>
@@ -87,148 +122,140 @@ const Footer = () => {
                         </ul>
                     </div>
 
-                    {/* Resources */}
+                    {/* Contact */}
                     <div>
-                        <h3 className="text-lg font-bold mb-6">Resources</h3>
+                        <h3 className="font-semibold text-gray-200 mb-4 text-sm uppercase tracking-wider">
+                            Kontak
+                        </h3>
                         <ul className="space-y-3">
-                            {[
-                                'Documentation',
-                                'API Reference',
-                                'Blog',
-                                'Case Studies',
-                                'Help Center',
-                                'Community',
-                            ].map((item) => (
-                                <li key={item}>
-                                    <button
-                                        className="text-gray-400 hover:text-green-400 transition-colors duration-300 block"
-                                    >
-                                        {item}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Contact & Newsletter */}
-                    <div>
-                        <h3 className="text-lg font-bold mb-6">Kontak</h3>
-                        <ul className="space-y-4">
                             <li className="flex items-start space-x-3">
-                                <Mail className="h-5 w-5 text-green-400 mt-1" />
-                                <a href="mailto:support@ecoguard.ai" className="text-gray-400 hover:text-green-400 transition-colors">
-                                    support@ecoguard.ai
+                                <Mail className="h-4 w-4 text-gray-400 mt-0.5" />
+                                <a href="EcoGuardAI@gmail.com" className="text-gray-400 hover:text-green-400 text-sm transition-colors">
+                                    EcoGuardAI@gmail.com
                                 </a>
                             </li>
                             <li className="flex items-start space-x-3">
-                                <Phone className="h-5 w-5 text-green-400 mt-1" />
-                                <a href="tel:+622112345678" className="text-gray-400 hover:text-green-400 transition-colors">
-                                    +62 21 1234 5678
+                                <Phone className="h-4 w-4 text-gray-400 mt-0.5" />
+                                <a href="tel:+62 856-4889-8807" className="text-gray-400 hover:text-green-400 text-sm transition-colors">
+                                    +62 856-4889-8807
                                 </a>
                             </li>
                             <li className="flex items-start space-x-3">
-                                <MapPin className="h-5 w-5 text-green-400 mt-1" />
-                                <span className="text-gray-400">
-                                    Jakarta, Indonesia
+                                <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
+                                <span className="text-gray-400 text-sm">
+                                    Malang, Indonesia
                                 </span>
                             </li>
                         </ul>
-
-                        {/* Newsletter - DIPERBAIKI */}
-                        <div className="mt-8">
-                            <h4 className="text-sm font-bold mb-3">NEWSLETTER</h4>
-                            <p className="text-gray-400 text-sm mb-4">
-                                Dapatkan tips dan update terbaru tentang keberlanjutan lingkungan.
-                            </p>
-
-                            <form onSubmit={handleSubscribe} className="space-y-3">
-                                <div className="flex">
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="Email Anda"
-                                        className="flex-grow px-3 py-2 bg-gray-800 text-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
-                                        required
-                                        disabled={loading || subscribed}
-                                    />
-                                    <button
-                                        type="submit"
-                                        className={`px-4 py-2 ${subscribed ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'} rounded-r-lg transition-all duration-300 font-medium text-sm whitespace-nowrap ${(loading || subscribed) ? 'opacity-90' : ''}`}
-                                        disabled={loading || subscribed}
-                                    >
-                                        {loading ? (
-                                            <span className="flex items-center justify-center">
-                                                <svg className="animate-spin h-4 w-4 mr-1 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                                Memproses...
-                                            </span>
-                                        ) : subscribed ? (
-                                            <span className="flex items-center justify-center">
-                                                <CheckCircle className="h-4 w-4 mr-1" />
-                                                Terdaftar!
-                                            </span>
-                                        ) : (
-                                            'Subscribe'
-                                        )}
-                                    </button>
-                                </div>
-
-                                {subscribed && (
-                                    <div className="bg-green-900/30 border border-green-800 rounded-lg p-2 animate-fadeIn">
-                                        <p className="text-green-400 text-xs flex items-center">
-                                            <CheckCircle className="h-3 w-3 mr-2 flex-shrink-0" />
-                                            Terima kasih! Anda telah berlangganan newsletter kami.
-                                        </p>
-                                    </div>
-                                )}
-
-                                <p className="text-gray-500 text-xs">
-                                    Dengan berlangganan, Anda menyetujui Kebijakan Privasi kami.
-                                </p>
-                            </form>
-                        </div>
                     </div>
                 </div>
 
                 {/* Divider */}
-                <div className="border-t border-gray-800 mt-12 pt-8">
-                    <div className="flex flex-col md:flex-row justify-between items-center">
+                <div className="border-t border-gray-800 my-8"></div>
+
+                {/* NEWSLETTER - IMPROVED DESIGN */}
+                <div className="max-w-lg mx-auto">
+                    <div className="text-center mb-6">
+                        <h4 className="font-bold text-xl text-gray-100 mb-2">
+                            Tetap Terinformasi
+                        </h4>
                         <p className="text-gray-400 text-sm">
-                            © {new Date().getFullYear()} EcoGuard AI. Hak Cipta Dilindungi.
+                            Dapatkan insight terbaru tentang efisiensi energi dan keberlanjutan.
                         </p>
-                        <div className="flex space-x-6 mt-4 md:mt-0">
-                            <a href="/privacy-policy" className="text-gray-400 hover:text-white text-sm transition-colors">
-                                Kebijakan Privasi
-                            </a>
-                            <a href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
-                                Syarat & Ketentuan
-                            </a>
-                            <a href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
-                                Cookies
-                            </a>
-                        </div>
                     </div>
 
-                    {/* Partnership */}
-                    <div className="mt-8 pt-8 border-t border-gray-800">
-                        <p className="text-gray-400 text-sm mb-4">Didukung oleh:</p>
-                        <div className="flex flex-wrap items-center gap-6">
-                            {[
-                                { name: 'Pertamina', color: 'bg-red-900/30 text-red-300' },
-                                { name: 'Kementerian ESDM', color: 'bg-blue-900/30 text-blue-300' },
-                                { name: 'Google Cloud', color: 'bg-gray-800 text-gray-300' },
-                                { name: 'AWS', color: 'bg-yellow-900/30 text-yellow-300' }
-                            ].map((partner) => (
-                                <div
-                                    key={partner.name}
-                                    className={`px-5 py-2 rounded-lg text-sm font-medium ${partner.color} border border-gray-700/50`}
-                                >
-                                    {partner.name}
+                    <form onSubmit={handleSubscribe} className="space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="relative flex-grow">
+                                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        setError('');
+                                    }}
+                                    placeholder="Masukkan email Anda"
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm transition-all duration-300"
+                                    required
+                                    disabled={isLoading || isSuccess}
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={isLoading || isSuccess}
+                                className={`px-6 py-3 rounded-lg font-medium text-sm transition-all duration-300 ${isLoading || isSuccess ? 'opacity-90' : 'hover:shadow-lg'} ${isSuccess ? 'bg-green-700' : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'}`}
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center justify-center">
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Memproses...
+                                    </span>
+                                ) : isSuccess ? (
+                                    <span className="flex items-center justify-center">
+                                        <CheckCircle className="h-4 w-4 mr-2" />
+                                        Berhasil!
+                                    </span>
+                                ) : (
+                                    'Subscribe'
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Error Message */}
+                        {error && (
+                            <div className="bg-red-900/30 border border-red-700 text-red-300 text-sm rounded-lg p-3 animate-fadeIn">
+                                {error}
+                            </div>
+                        )}
+
+                        {/* Success Message */}
+                        {isSuccess && (
+                            <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-700/50 text-green-300 text-sm rounded-lg p-4 animate-fadeIn">
+                                <div className="flex items-center">
+                                    <CheckCircle className="h-5 w-5 mr-3 flex-shrink-0" />
+                                    <div>
+                                        <p className="font-medium">Terima kasih telah berlangganan!</p>
+                                        <p className="text-green-400/80 text-xs mt-1">
+                                            Kami akan mengirimkan update terbaru ke email Anda.
+                                        </p>
+                                    </div>
                                 </div>
-                            ))}
+                            </div>
+                        )}
+
+                        {/* Privacy Notice */}
+                        <p className="text-gray-500 text-xs text-center">
+                            Dengan berlangganan, Anda menyetujui{' '}
+                            <a href="/privacy" className="text-green-500 hover:text-green-400 transition-colors">
+                                Kebijakan Privasi
+                            </a>{' '}
+                            kami. Kami tidak akan membagikan email Anda.
+                        </p>
+                    </form>
+                </div>
+            </div>
+
+            {/* Bottom Bar */}
+            <div className="bg-gray-950 py-6">
+                <div className="container mx-auto px-4">
+                    <div className="flex flex-col md:flex-row justify-between items-center">
+                        <div className="mb-4 md:mb-0">
+                            <p className="text-gray-500 text-sm">
+                                © {new Date().getFullYear()} EcoGuard AI. All rights reserved.
+                            </p>
+                        </div>
+
+                        <div className="flex space-x-6">
+                            <a href="/privacy" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">
+                                Privacy Policy
+                            </a>
+                            <a href="/terms" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">
+                                Terms of Service
+                            </a>
+                            <a href="/cookies" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">
+                                Cookie Policy
+                            </a>
                         </div>
                     </div>
                 </div>
