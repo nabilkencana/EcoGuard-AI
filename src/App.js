@@ -1,8 +1,10 @@
 // src/App.jsx
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
+
 import Home from './pages/Home';
 import About from './pages/About';
 import FeaturesPage from './pages/FeaturesPage';
@@ -14,8 +16,11 @@ import UnderDevelopment from './pages/UnderDevelopment';
 function App() {
   return (
     <Router>
+      <ScrollToTop />   {/* 👈 Ini yang bikin auto scroll ke atas */}
+
       <div className="min-h-screen flex flex-col">
         <Header />
+
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -27,6 +32,7 @@ function App() {
             <Route path="/under-development" element={<UnderDevelopment />} />
           </Routes>
         </main>
+
         <Footer />
       </div>
     </Router>

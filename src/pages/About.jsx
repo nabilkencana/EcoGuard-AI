@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Target, Users, Award, Globe } from 'lucide-react';
+import { Target, Users, Award, Globe, Linkedin, Mail, Github, Twitter , InstagramIcon} from 'lucide-react';
 import SectionTitle from '../components/common/SectionTitle';
 import Card from '../components/common/Card';
 
@@ -39,13 +39,133 @@ const About = () => {
         { year: '24 Januari 2026', event: 'Eco-Innovation Competition' },
     ];
 
+    // Data team dengan path gambar dan social media
+    const teamMembers = [
+        {
+            name: 'M. Nabil Anwar K.',
+            role: 'Developer dan Project Manager',
+            description: 'Membuat website dan aplikasi, Logika dan implementasi',
+            image: '/images/team/nabil.jpeg',
+            color: 'from-green-400 to-emerald-500',
+            social: {
+                linkedin: 'https://linkedin.com/in/nabilkencana',
+                github: 'https://github.com/nabilkencana',
+                Instagram: 'https://www.instagram.com/nabill.anwr',
+                email: 'nabilkencana20@gmail.com'
+            }
+        },
+        {
+            name: 'Risky Nabil Pahlevi',
+            role: 'QA Website',
+            description: 'Pengetesan website dan quality assurance',
+            image: '/images/team/risky.jpeg',
+            color: 'from-blue-400 to-cyan-500',
+            social: {
+                linkedin: 'https://www.linkedin.com/in/nabil-risky-ba1904387',
+                github: 'https://github.com/RiskyNabil213',
+                Instagram: 'https://www.instagram.com/risky_nblp',
+                email: 'nabilrisky390@gmail.com'
+            }
+        },
+        {
+            name: 'Styven Dwi Nugroho',
+            role: 'Pemantapan Ide',
+            description: 'Penyempurnaan Ide dan Pengembangan konsep awal',
+            image: '/images/team/steven.jpeg',
+            color: 'from-purple-400 to-pink-500',
+            social: {
+                linkedin: 'https://www.linkedin.com/in/styven-dwinugrohro-615810383',
+                github: 'https://github.com/Styvenn',
+                Instagram: 'https://www.instagram.com/svndyr',
+                email: 'styvendwi123098@gmail.com'
+            }
+        },
+        {
+            name: 'Nauval Luthf Hisyam',
+            role: 'Developer IOT',
+            description: 'Pembuatan prototype IOT dan Pembuatan blueprint IOT',
+            image: '/images/team/nopal.jpg',
+            color: 'from-orange-400 to-red-500',
+            social: {
+                linkedin: 'https://www.linkedin.com/in/nauval-faiz-0b1436339',
+                github: 'https://github.com/NauvalFaiz',
+                Instagram: 'https://www.instagram.com/nfaix',
+                email: 'nauvalfaizluthfhisyam33@gmail.com'
+            }
+        },
+        {
+            name: 'Elzidane Ardyansyah',
+            role: 'QA Application',
+            description: 'Pengetesan aplikasi EcoGuard',
+            image: '/images/team/zidan.jpeg',
+            color: 'from-amber-400 to-yellow-500',
+            social: {
+                linkedin: 'https://www.linkedin.com/in/zidane-ardyansyah-988006348?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app',
+                github: 'https://github.com/elzidane',
+                Instagram: 'https://www.instagram.com/_elzdne',
+                email: 'elzidaneardyansyah265@gmail.com'
+            }
+        },
+    ];
+
+    // Component untuk social media icons
+    const SocialIcon = ({ type, url }) => {
+        const icons = {
+            linkedin: {
+                icon: Linkedin,
+                color: 'hover:bg-blue-100 hover:text-blue-600',
+                tooltip: 'LinkedIn'
+            },
+            github: {
+                icon: Github,
+                color: 'hover:bg-gray-900 hover:text-white',
+                tooltip: 'GitHub'
+            },
+            twitter: {
+                icon: Twitter,
+                color: 'hover:bg-sky-100 hover:text-sky-600',
+                tooltip: 'Twitter'
+            },
+            email: {
+                icon: Mail,
+                color: 'hover:bg-red-100 hover:text-red-600',
+                tooltip: 'Email'
+            },
+            Instagram: {
+                icon: InstagramIcon,
+                color: 'hover:bg-red-100 hover:text-red-600',
+                tooltip: 'Instagram'
+            }
+        };
+
+        const { icon: Icon, color, tooltip } = icons[type] || { icon: null, color: '', tooltip: '' };
+
+        if (!Icon) return null;
+
+        return (
+            <a
+                href={type === 'email' ? `mailto:${url}` : url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 transition-all duration-300 transform hover:scale-110 ${color} group relative`}
+                title={tooltip}
+            >
+                <Icon className="h-4 w-4" />
+                {/* Tooltip */}
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                    {tooltip}
+                </span>
+            </a>
+        );
+    };
+
     return (
         <div className="pt-24 pb-20">
             {/* Hero Section */}
             <section className="container mx-auto px-4 mb-20">
                 <div className="max-w-4xl mx-auto">
                     <SectionTitle
-                        title="Tentang EcoGuard AI"
+                        title1="Tentang EcoGuard AI"
                         subtitle="Inovasi untuk Masa Depan Berkelanjutan"
                         description="EcoGuard AI adalah solusi revolusioner yang menggabungkan kecerdasan buatan dengan monitoring lingkungan untuk menciptakan dunia yang lebih hijau dan efisien."
                         align="center"
@@ -211,34 +331,8 @@ const About = () => {
                     className="mb-12"
                 />
 
-                <div className="grid md:grid-cols-3 gap-8">
-                    {[
-                        {
-                            name: 'M. Nabil Anwar K.',
-                            role: 'Developer dan Project Manager',
-                            description: 'Membuat website and aplikasi , Logika dan implementasi',
-                        },
-                        {
-                            name: 'Risky Nabil Pahlevi',
-                            role: 'QA Website',
-                            description: 'Pengetesan website.',
-                        },
-                        {
-                            name: 'Styven Dwi Nugroho',
-                            role: 'Pemantapan Ide ',
-                            description: 'Penyempurnaan Ide dan Pengembangan konsep awal .',
-                        },
-                        {
-                            name: 'Nauval Luthf Hisyam',
-                            role: 'Developer IOT',
-                            description: 'Pembeuatan prototype IOT dan Pembuatan blueprint IOT.',
-                        },
-                        {
-                            name: 'Elzidane Ardyansyah',
-                            role: 'QA Application',
-                            description: 'Pengetesan aplikasi EcoGuard.',
-                        },
-                    ].map((member, index) => (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {teamMembers.map((member, index) => (
                         <motion.div
                             key={index}
                             initial={{ opacity: 0, y: 20 }}
@@ -246,17 +340,47 @@ const About = () => {
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             viewport={{ once: true }}
                         >
-                            <Card className="text-center">
-                                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-400 to-blue-400" />
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            <Card className="text-center group hover:shadow-xl transition-all duration-300 p-6">
+                                {/* Gambar Team Member */}
+                                <div className="relative w-32 h-32 mx-auto mb-6 overflow-hidden rounded-full border-4 border-white shadow-lg group-hover:shadow-xl">
+                                    {/* Fallback gradient jika gambar tidak ada */}
+                                    <div className={`absolute inset-0 bg-gradient-to-br ${member.color} group-hover:scale-110 transition-transform duration-500`} />
+
+                                    {/* Gambar asli */}
+                                    <img
+                                        src={member.image}
+                                        alt={member.name}
+                                        className="relative z-10 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                        }}
+                                    />
+
+                                    {/* Overlay efek hover */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
+                                </div>
+
+                                {/* Info Team Member */}
+                                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
                                     {member.name}
                                 </h3>
                                 <p className="text-green-600 font-medium mb-3">
                                     {member.role}
                                 </p>
-                                <p className="text-gray-600 text-sm">
+                                <p className="text-gray-600 text-sm mb-6">
                                     {member.description}
                                 </p>
+
+                                {/* Social Media Icons */}
+                                <div className="mt-4 flex justify-center space-x-3">
+                                    {Object.entries(member.social).map(([platform, url]) => (
+                                        <SocialIcon
+                                            key={platform}
+                                            type={platform}
+                                            url={url}
+                                        />
+                                    ))}
+                                </div>
                             </Card>
                         </motion.div>
                     ))}

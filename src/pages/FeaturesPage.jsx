@@ -86,7 +86,7 @@ const FeaturesPage = () => {
             <div className="container mx-auto px-4">
                 {/* Hero Section */}
                 <SectionTitle
-                    title="Fitur Lengkap EcoGuard AI"
+                    title1="Fitur Lengkap EcoGuard AI"
                     subtitle="Teknologi Canggih untuk Efisiensi Maksimal"
                     description="Jelajahi semua fitur yang membuat EcoGuard AI menjadi solusi terdepan dalam manajemen sumber daya dan keberlanjutan."
                     align="center"
