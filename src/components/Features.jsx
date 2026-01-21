@@ -104,7 +104,7 @@ const Features = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
                     viewport={{ once: true }}
-                    className="mt-20 bg-gradient-to-r from-green-600 to-green-500 rounded-3xl p-12 text-white"
+                    className="mt-20 bg-gradient-to-r from-green-700 to-green-600 rounded-3xl p-12 text-white"
                 >
                     <div className="flex flex-col lg:flex-row items-center justify-between">
                         <div className="lg:w-2/3 mb-8 lg:mb-0">
