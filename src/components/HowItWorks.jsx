@@ -83,7 +83,7 @@ const HowItWorks = () => {
                                     className={`relative ${isLeft ? 'lg:text-right lg:pr-16' : 'lg:text-left lg:pl-16 lg:mt-24'}`}
                                 >
                                     {/* Step Number */}
-                                    <div className={`absolute lg:absolute top-0 ${isLeft ? 'lg:right-0 lg:transform lg:translate-x-1/2' : 'lg:left-0 lg:transform -lg:translate-x-1/2'} ${isLeft ? 'lg:mt-20' : 'lg:mt-72'} z-10`}>
+                                    <div className={`absolute lg:absolute top-0 ${isLeft ? 'lg:right-0 lg:transform lg:translate-x-1/2' : 'lg:-left-8 lg:transform -lg:translate-x-1/2'} ${isLeft ? 'lg:mt-20' : 'lg:mt-72'} z-10`}>
                                         <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg`}>
                                             <span className="text-white text-xl font-bold">{step.step}</span>
                                         </div>

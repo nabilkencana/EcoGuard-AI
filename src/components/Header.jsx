@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Leaf, LogOut, ChevronDown } from 'lucide-react';
 import { auth, googleProvider, signInWithPopup, signOut } from '../lib/firebase';
 
+
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
