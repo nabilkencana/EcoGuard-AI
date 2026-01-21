@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 
 const SectionTitle = ({
     title,
+    title1,
     subtitle,
     description,
     align = 'center',
@@ -37,8 +38,14 @@ const SectionTitle = ({
             )}
 
             {title && (
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
                     {title}
+                </h2>
+            )}
+
+            {title1 && (
+                <h2 className="text-4xl md:text-5xl font-bold text-black mb-6 leading-tight">
+                    {title1}
                 </h2>
             )}
             
