@@ -58,7 +58,7 @@ const About = () => {
             name: 'Risky Nabil Pahlevi',
             role: 'QA Website',
             description: 'Pengetesan website dan quality assurance',
-            image: '/images/team/risky.jpeg',
+            image: '/images/team/risky.JPEG',
             color: 'from-blue-400 to-cyan-500',
             social: {
                 linkedin: 'https://www.linkedin.com/in/nabil-risky-ba1904387',
