@@ -113,7 +113,7 @@ Participants: ${data.participants}
 Agenda:
 ${data.agenda}
 
-✅ Please confirm within 24 hours!
+Please confirm within 24 hours!
         `.replace(/\n/g, '%0A');
 
         window.open(`https://wa.me/6285648898807?text=${message}`, '_blank');
