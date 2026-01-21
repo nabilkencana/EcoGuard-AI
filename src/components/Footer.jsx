@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Mail, Phone, MapPin, Facebook, Linkedin, Twitter, Instagram, CheckCircle, Loader2 } from 'lucide-react';
+import { Leaf, Mail, Phone, MapPin,CheckCircle, Loader2 } from 'lucide-react';
 
 const Footer = () => {
     const [email, setEmail] = useState('');
