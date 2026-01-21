@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Download, CheckCircle, AlertCircle, Loader2, Send, User, Bot, Bolt, Calendar, LightningBolt } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { ArrowRight, Download, CheckCircle, AlertCircle, Loader2, Send, User, Bot, Bolt, Calendar } from 'lucide-react'; // REMOVE LightningBolt
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import emailjs from '@emailjs/browser';
@@ -19,7 +19,6 @@ const CTASection = () => {
         message: '',
         agreePrivacy: false
     });
-    
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formStatus, setFormStatus] = useState({
@@ -55,8 +54,8 @@ const CTASection = () => {
         emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
     }, []);
 
-    // Initialize chat engine
-    useEffect(() => {
+    // Initialize chat engine dengan useCallback yang benar
+    const initializeChatEngine = useCallback(() => {
         const engine = new AIChatEngine(userProfile.industry);
 
         // Set user profile if available
@@ -94,7 +93,13 @@ Saya bisa bantu dengan:
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [userProfile.industry, userProfile.name]);
+    }, [userProfile]); // Tambahkan userProfile ke dependency
+
+    // Initialize chat engine
+    useEffect(() => {
+        const cleanup = initializeChatEngine();
+        return cleanup;
+    }, [initializeChatEngine]);
 
     // Scroll to bottom of chat
     useEffect(() => {
@@ -176,7 +181,7 @@ Saya bisa bantu dengan:
                 // Gunakan parameter yang sesuai dengan template DEMO_REQUEST
                 const emailParams = {
                     // Parameter yang wajib untuk recipient
-                    reply_to: submissionData.email, // Bisa juga to_email, email, user_email
+                    reply_to: submissionData.email,
                     to_email: submissionData.email,
                     email: submissionData.email,
 
@@ -694,88 +699,8 @@ Email sending failed: ${error.message}
         }
     };
 
-    // Quick reply buttons untuk AI chat yang lama (backward compatibility)
-    const quickReplies = [
-        "Berapa penghematan yang bisa dicapai?",
-        "Apa ROI period untuk bisnis saya?",
-        "Teknologi apa yang digunakan?",
-        "Berapa biaya implementasi?",
-        "Ada case study di industri saya?",
-        "Proses implementasi seperti apa?"
-    ];
-
-    // Enhanced user info form component
-    const UserProfileForm = ({ userProfile, setUserProfile }) => {
-        return (
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 md:p-6 rounded-xl border border-blue-200 mb-4">
-                <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center">
-                    <User className="h-4 w-4 mr-2 text-blue-600" />
-                    Profil Anda (Opsional, untuk personalisasi)
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                    <input
-                        type="text"
-                        placeholder="Nama"
-                        value={userProfile.name}
-                        onChange={(e) => setUserProfile(prev => ({ ...prev, name: e.target.value }))}
-                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                    />
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={userProfile.email}
-                        onChange={(e) => setUserProfile(prev => ({ ...prev, email: e.target.value }))}
-                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                    />
-                    <input
-                        type="tel"
-                        placeholder="WhatsApp"
-                        value={userProfile.phone}
-                        onChange={(e) => setUserProfile(prev => ({ ...prev, phone: e.target.value }))}
-                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                    />
-                    <select
-                        value={userProfile.role}
-                        onChange={(e) => setUserProfile(prev => ({ ...prev, role: e.target.value }))}
-                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                    >
-                        <option value="">Posisi/Role</option>
-                        <option value="owner">Owner/Pemilik</option>
-                        <option value="director">Direktur</option>
-                        <option value="manager">Manajer</option>
-                        <option value="engineer">Engineer</option>
-                        <option value="consultant">Konsultan</option>
-                        <option value="other">Lainnya</option>
-                    </select>
-                    <select
-                        value={userProfile.industry}
-                        onChange={(e) => setUserProfile(prev => ({ ...prev, industry: e.target.value }))}
-                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                    >
-                        <option value="manufacturing">Manufaktur</option>
-                        <option value="property">Property</option>
-                        <option value="retail">Retail</option>
-                        <option value="hospitality">Hospitality</option>
-                        <option value="healthcare">Healthcare</option>
-                        <option value="education">Education</option>
-                    </select>
-                </div>
-
-                {userProfile.name && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="mt-3 text-xs text-green-700 bg-green-50 p-2 rounded-lg"
-                    >
-                        ✅ Chat akan dipersonalisasi untuk {userProfile.name} ({userProfile.role || 'Tidak spesifik'}) di industri {userProfile.industry}
-                        {userProfile.email && ` • Email: ${userProfile.email}`}
-                        {userProfile.phone && ` • WA: ${userProfile.phone}`}
-                    </motion.div>
-                )}
-            </div>
-        );
-    }
+    // REMOVE unused variables atau gunakan
+    // const quickReplies = []; // Hapus jika tidak digunakan
 
     // ==================== RENDER ====================
 
